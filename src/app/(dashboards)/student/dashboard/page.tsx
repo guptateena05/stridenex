@@ -14,6 +14,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getDashboardStats, getStudentByEmail, getStudentInternshipList, getLearningActivity, getTodaysOpportunityAlerts } from "@/services/student.services";
 import SuccessStoriesFooter from "@/components/dashboards/student/SuccessStoriesFooter";
 import StudentGuidelineTour from "@/components/dashboards/student/StudentGuidelineTour";
+import PsychometricTestModal from "@/components/PsychometricTestModal";
+import { psychometricApi } from "@/services/psychometricApi";
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -39,7 +41,7 @@ const item: Variants = {
 };
 
 export default function StudentDashboardPage() {
-  const { currentUser } = useAuth();
+  const { currentUser, isInitialized } = useAuth();
 
   const [statsData, setStatsData] = useState<any>(() => {
     if (typeof window !== "undefined") {
@@ -58,6 +60,30 @@ export default function StudentDashboardPage() {
     newPostings: any[];
     deadlineAlerts: any[];
   }>({ newPostings: [], deadlineAlerts: [] });
+  const [showTestModal, setShowTestModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    const emailToCheck = currentUser || (typeof window !== "undefined" ? localStorage.getItem("currentUser") : null);
+    if (!emailToCheck) {
+      setShowTestModal(false);
+      return;
+    }
+
+    const checkOnboarding = async () => {
+      try {
+        const res = await psychometricApi.checkOnboardingStatus(emailToCheck);
+        if (res.is_first_login && !res.is_onboarded) {
+          setShowTestModal(true);
+        } else {
+          setShowTestModal(false);
+        }
+      } catch (err) {
+        console.error("Failed to check student onboarding status", err);
+      }
+    };
+    checkOnboarding();
+  }, [currentUser, isInitialized]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -305,6 +331,12 @@ export default function StudentDashboardPage() {
         </motion.div>
       </motion.div>
       {currentUser && <StudentGuidelineTour studentEmail={currentUser!} />}
+      <PsychometricTestModal
+        isOpen={showTestModal}
+        onClose={() => setShowTestModal(false)}
+        onCompleted={() => setShowTestModal(false)}
+        studentEmail={currentUser || undefined}
+      />
     </>
   );
 }
