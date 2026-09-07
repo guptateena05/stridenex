@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "StrideNex - Pathways to Your Future",
   description: "",
   icons: {
-    icon: '/images/favicon.jpeg',
+    icon: '/images/favicon.png',
   },
 };
 
