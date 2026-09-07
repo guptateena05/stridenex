@@ -418,10 +418,7 @@ export default function StoriesTabContent() {
             <AnimatePresence>
                 {isOpen && createPortal(
                     <>
-                        {/* StrideNex Logo brought to front */}
-                        <div className="absolute top-4 left-6 z-[1010] pointer-events-none">
-                            <img src="/images/Logo.png" alt="StrideNex Logo" className="w-48 h-12 object-contain drop-shadow-sm" />
-                        </div>
+                        
                         {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}

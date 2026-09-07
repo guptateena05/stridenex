@@ -709,14 +709,7 @@ export default function MyProfileTabContent() {
             onClick={() => setIsImagePreviewOpen(false)}
             className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 cursor-zoom-out"
           >
-            {/* StrideNex Logo brought to front */}
-            <div className="absolute top-4 left-6 z-[1000] pointer-events-none">
-              <img
-                src="/images/Logo.png"
-                alt="StrideNex Logo"
-                className="w-48 h-12 object-contain drop-shadow-sm"
-              />
-            </div>
+            
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
