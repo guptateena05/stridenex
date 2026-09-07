@@ -30,14 +30,7 @@ export function OfferLetterModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      {/* StrideNex Logo brought to front */}
-      <div className="absolute top-4 left-6 z-[110] pointer-events-none">
-        <img
-          src="/images/Logo.png"
-          alt="StrideNex Logo"
-          className="w-48 h-12 object-contain drop-shadow-sm"
-        />
-      </div>
+      
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}

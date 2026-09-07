@@ -1220,14 +1220,7 @@ export default function MentorsTabContent() {
       {/* ── Review Modal ── */}
       {reviewSession && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <motion.div
             initial={{ opacity: 0, scale: 0.93, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1350,14 +1343,7 @@ export default function MentorsTabContent() {
       {/* ── View Note Modal ── */}
       {viewingNoteSession && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <motion.div
             initial={{ opacity: 0, scale: 0.93, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1436,14 +1422,7 @@ export default function MentorsTabContent() {
       {/* Booking Modal */}
       {selectedMentorForBooking && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

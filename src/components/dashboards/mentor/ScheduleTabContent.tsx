@@ -1036,14 +1036,7 @@ export default function ScheduleTabContent() {
       {/* Block Time Modal */}
       {blockModalOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col mx-4">
             <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h3 className="font-bold text-slate-800 text-lg">Block Time</h3>
@@ -1163,14 +1156,7 @@ export default function ScheduleTabContent() {
       {/* Reschedule Modal */}
       {rescheduleModalOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col mx-4">
             <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h3 className="font-bold text-slate-800 text-lg">Reschedule Session</h3>
@@ -1264,14 +1250,7 @@ export default function ScheduleTabContent() {
       {/* Set Availability Modal */}
       {availabilityModalOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <div className="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden flex flex-col mx-4 max-h-[90vh]">
             <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h3 className="font-bold text-slate-800 text-lg">Configure Availability</h3>
@@ -1460,14 +1439,7 @@ export default function ScheduleTabContent() {
       {/* Prep Notes Modal */}
       {notesModalOpen && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <div className="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden flex flex-col mx-4 max-h-[90vh]">
             <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>

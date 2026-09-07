@@ -428,14 +428,7 @@ export default function CampusDrivesTabContent() {
       {/* Details Dialog */}
       {showDetails && selectedDrive && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          {/* StrideNex Logo brought to front */}
-          <div className="absolute top-4 left-6 z-[60] pointer-events-none">
-            <img
-              src="/images/Logo.png"
-              alt="StrideNex Logo"
-              className="w-48 h-12 object-contain drop-shadow-sm"
-            />
-          </div>
+          
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

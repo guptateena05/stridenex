@@ -1699,14 +1699,7 @@ export default function PathTabContent() {
             <AnimatePresence>
               {showConfirmModal && (
                 <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-[250] p-4">
-                  {/* StrideNex Logo brought to front */}
-                  <div className="absolute top-4 left-6 z-[260] pointer-events-none">
-                    <img
-                      src="/images/Logo.png"
-                      alt="StrideNex Logo"
-                      className="w-48 h-12 object-contain drop-shadow-sm"
-                    />
-                  </div>
+                  
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -2342,14 +2335,7 @@ export default function PathTabContent() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4"
             >
-              {/* StrideNex Logo brought to front */}
-              <div className="absolute top-4 left-6 z-[110] pointer-events-none">
-                <img
-                  src="/images/Logo.png"
-                  alt="StrideNex Logo"
-                  className="w-48 h-12 object-contain drop-shadow-sm"
-                />
-              </div>
+              
               <motion.div
                 initial={{ scale: 0.95, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -2689,14 +2675,7 @@ export default function PathTabContent() {
         <AnimatePresence>
           {showCelebration && (
             <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-              {/* StrideNex Logo brought to front */}
-              <div className="absolute top-4 left-6 z-[210] pointer-events-none">
-                <img
-                  src="/images/Logo.png"
-                  alt="StrideNex Logo"
-                  className="w-48 h-12 object-contain drop-shadow-sm"
-                />
-              </div>
+              
               <ConfettiEffect />
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}

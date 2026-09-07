@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Loader2, Target, Zap, FileText } from "lucide-react";
 import { updateProjectApplicationStatus } from "@/services/industry.services";
@@ -24,6 +25,11 @@ export default function ApplicationsPipelineModal({
   projectName,
   onStatusUpdated
 }: ApplicationsPipelineModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const { showToast } = useToast();
 
   const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
@@ -106,19 +112,14 @@ export default function ApplicationsPipelineModal({
     return dateString;
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            {/* StrideNex Logo brought to front */}
-            <div className="absolute top-4 left-6 z-[110] pointer-events-none">
-              <img
-                src="/images/Logo.png"
-                alt="StrideNex Logo"
-                className="w-48 h-12 object-contain drop-shadow-sm"
-              />
-            </div>
+            
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -209,14 +210,7 @@ export default function ApplicationsPipelineModal({
       <AnimatePresence>
         {selectedApplication && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            {/* StrideNex Logo brought to front */}
-            <div className="absolute top-4 left-6 z-[120] pointer-events-none">
-              <img
-                src="/images/Logo.png"
-                alt="StrideNex Logo"
-                className="w-48 h-12 object-contain drop-shadow-sm"
-              />
-            </div>
+            
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -316,6 +310,7 @@ export default function ApplicationsPipelineModal({
           </div>
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body
   );
 }
