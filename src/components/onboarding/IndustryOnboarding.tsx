@@ -188,12 +188,10 @@ export default function IndustryOnboarding({
         setLoading(true);
         try {
             const response = await axios.get(`${BASE_URL}method/stridenex_app.api_stridenex_app.industry.industry.get_industry_by_name?email=${email}`);
-            console.log("Industry API Response:", response.data);
             if (response.data?.message) {
                 const messageObj = response.data.message;
                 const data = messageObj.data || messageObj; // Handle both direct and nested data
 
-                console.log("Extracted Industry Data:", data);
                 if (data) {
                     // Map data to formData
                     setFormData(prev => ({
@@ -546,8 +544,6 @@ export default function IndustryOnboarding({
                 }
             }
 
-            console.log(`Submitting Step ${step} payload to ${endpoint} via ${method.toUpperCase()}:`, payload);
-
             const response = await axios({
                 method: method,
                 url: endpoint,
@@ -598,7 +594,6 @@ export default function IndustryOnboarding({
                                 billing_details: [{ title: "Stridenex App" }]
                             }
                         };
-                        console.log("Submitting Industry Billing registration payload:", billingPayload);
 
                         const storedApiKey = localStorage.getItem("apiKey") || "";
                         const storedApiSecret = localStorage.getItem("apiSecret") || "";
@@ -614,8 +609,6 @@ export default function IndustryOnboarding({
                             billingPayload,
                             { headers: billingHeaders }
                         );
-
-                        console.log("Billing API full response:", billingResponse.data);
 
                         // Frappe wraps return values inside "message", so check the correct path
                         const billingResult = billingResponse.data?.message || billingResponse.data;
@@ -644,10 +637,8 @@ export default function IndustryOnboarding({
                     setTimeout(() => {
                         // ✅ Check if coming from mobile
                         if (isMobileSource) {
-                            console.log("Mobile source - redirecting to web login");
                             window.location.href = "https://testwebstridenex.quantcloud.in/login";
                         } else {
-                            console.log("Web source - redirecting to /login");
                             window.location.href = "/login";
                         }
                     }, 1500);
@@ -861,20 +852,14 @@ export default function IndustryOnboarding({
 
     const handleSkip = () => {
         if (onSkip) {
-            console.log("skip1 - calling onSkip");
             onSkip();
         } else {
-            console.log("skip2 - isMobileSource:", isMobileSource);
             localStorage.clear();
 
             // ✅ Check if coming from mobile
             if (isMobileSource) {
-                // Mobile user - redirect to web login (WebView will catch it)
-                console.log("Mobile source - redirecting to web login");
                 window.location.href = "https://testwebstridenex.quantcloud.in/login";
             } else {
-                // Web user - redirect to regular login
-                console.log("Web source - redirecting to /login");
                 window.location.href = "/login";
             }
         }

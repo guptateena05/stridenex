@@ -168,7 +168,6 @@ export default function CompanyProfileTabContent() {
           raw: domain
         };
       });
-      console.log("SUCCESSFULLY MAPPED:", mapped.length, "domains for", companyName);
       setSkillDomains(mapped);
     } catch (err: any) {
       console.error("Error in fetchSkillsList:", err);
@@ -415,13 +414,10 @@ export default function CompanyProfileTabContent() {
           skills: Array.isArray(formData.skills) ? formData.skills.map((s: string) => ({ skill: s })) : [],
           roles: Array.isArray(formData.roles) ? formData.roles.map((r: string) => ({ designation: r })) : [],
         };
-        console.log("CompanyProfileTabContent: Submitting skill_domain payload:", payload);
         if (skillDomainToEdit) {
-          console.log("CompanyProfileTabContent: Updating skill domain named:", skillDomainToEdit.name);
           await updateSkillDomain(skillDomainToEdit.name, { ...payload, name: skillDomainToEdit.name });
           setSkillDomainToEdit(undefined);
         } else {
-          console.log("CompanyProfileTabContent: Creating new skill domain");
           await createSkillDomain(payload);
         }
         await fetchSkillsList();

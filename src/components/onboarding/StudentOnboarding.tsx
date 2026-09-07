@@ -157,8 +157,6 @@ export default function StudentOnboarding({
     }
   }, [isOnboarded]);
 
-  console.log('form data', formData)
-
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (emailTimer > 0) {
@@ -219,8 +217,6 @@ export default function StudentOnboarding({
         doctype: "State"
       },
       mapOptions: (data) => {
-        console.log("State data received in mapOptions:", data); // This should be the array
-
         // 'data' is already the array, so just map it directly
         return data.map((state: any) => ({
           value: state.name,
@@ -244,7 +240,6 @@ export default function StudentOnboarding({
         limit_page_length: 1000
       } : undefined,
       mapOptions: (data) => {
-        console.log("District data in mapOptions:", data);
         // data is the array from the response
         return data.map((district: any) => ({
           value: district.name,
@@ -425,8 +420,6 @@ export default function StudentOnboarding({
         ? `${BASE_URL}method/stridenex_app.api_stridenex_app.student.masters.get_semester`
         : undefined,
       mapOptions: (data) => {
-        console.log("Semester data received:", data);
-
         const semesters = Array.isArray(data)
           ? data
           : Array.isArray(data?.data)
@@ -487,7 +480,6 @@ export default function StudentOnboarding({
         fields: ["skill_name"],
       },
       mapOptions: (data) => {
-        console.log("Skills data received:", data);
         const items = data.data || data || [];
         return items.map((item: any) => ({
           value: item.name || item.skill_name,
@@ -508,7 +500,6 @@ export default function StudentOnboarding({
         doctype: "Student Career Interest" // Updated doctype
       },
       mapOptions: (data) => {
-        console.log("Career Interest data received:", data);
         const items = data.data || data || [];
         return items.map((item: any) => ({
           value: item.name || item.career_interest_name,
@@ -578,7 +569,6 @@ export default function StudentOnboarding({
 
     try {
       const response = await sendEmailOTP(formData.email);
-      console.log("Send email OTP response:", response);
 
       if (response?.message?.status === "success") {
         setSuccess(response.message.message || "OTP sent successfully");
@@ -602,7 +592,6 @@ export default function StudentOnboarding({
 
     try {
       const response = await verifyEmailOTP(formData.email, emailVerificationCode);
-      console.log("Verify email response:", response);
 
       if (response?.message === "Email verified successfully") {
         setFormData(prev => ({ ...prev, emailVerified: true }));
@@ -640,15 +629,12 @@ export default function StudentOnboarding({
 
     try {
       const response = await sendMobileOTP(formData.mobileNo, formData.email);
-      console.log("Send mobile OTP response:", response);
 
       if (response?.message === "OTP sent successfully") {
         setSuccess(response.message);
         setMobileOtpSent(true);
         setMobileTimer(120); // Start 2 minute timer
-        if (response.data) {
-          console.log("OTP received:", response.data);
-        }
+        if (response.data) {}
       } else {
         setError(response?.message || "Failed to send OTP");
       }
@@ -667,7 +653,6 @@ export default function StudentOnboarding({
 
     try {
       const response = await verifyMobileOTP(formData.mobileNo, mobileVerificationCode, formData.email);
-      console.log("Verify mobile response:", response);
 
       if (response?.message === "Mobile number verified successfully") {
         setFormData(prev => ({ ...prev, mobileVerified: true }));
@@ -885,12 +870,8 @@ export default function StudentOnboarding({
         referal_code: formData.hasReferral ? (formData.referal_code || "") : ""
       };
 
-      console.log("Submitting payload:", payload);
-
       // Call the createStudent service
       const responseData = await createStudent(payload);
-
-      console.log("Registration response:", responseData);
 
       // Strict check: responseData status or internal message status
       const internalStatus = responseData?.message?.status;
@@ -913,7 +894,6 @@ export default function StudentOnboarding({
               billing_details: [{ title: "Stridenex App" }]
             }
           };
-          console.log("Submitting Student Billing registration payload:", billingPayload);
 
           const storedApiKey = localStorage.getItem("apiKey") || "";
           const storedApiSecret = localStorage.getItem("apiSecret") || "";
@@ -929,8 +909,6 @@ export default function StudentOnboarding({
             billingPayload,
             { headers: billingHeaders }
           );
-
-          console.log("Billing API full response:", billingResponse.data);
 
           // Frappe wraps return values inside "message", so check the correct path
           const billingResult = billingResponse.data?.message || billingResponse.data;
@@ -1310,8 +1288,6 @@ export default function StudentOnboarding({
           }}
           errors={fieldErrors}
           onChange={(data) => {
-            console.log("Form data changed:", data);
-
             // Determine which field changed
             const changedField = Object.keys(data).find(
               key => data[key] !== formData[key as keyof typeof formData]

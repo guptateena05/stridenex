@@ -123,42 +123,38 @@ export const verifyEmailOTP = async (email: string, otp: string): Promise<any> =
 
 export const createStudent = async (payload: CreateStudentPayload) => {
   try {
-    // Create FormData for file upload
-    const formData = new FormData();
-    
-    // Append all fields to FormData
-    Object.keys(payload).forEach(key => {
-      const value = payload[key as keyof CreateStudentPayload];
-      
-      if (key === 'resume' && value instanceof File) {
-        // Append file separately
-        formData.append('resume', value);
-      } else if (key === 'courses_type' || key === 'skill' || key === 'career_interest') {
-        // Append arrays as JSON strings
-        formData.append(key, JSON.stringify(value));
-      } else if (value !== null && value !== undefined) {
-        // Append other fields
-        formData.append(key, String(value));
-      }
-    });
+      // Create FormData for file upload
+      const formData = new FormData();
 
-    // Log the FormData contents for debugging
-    console.log("Submitting FormData:");
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
+      // Append all fields to FormData
+      Object.keys(payload).forEach(key => {
+        const value = payload[key as keyof CreateStudentPayload];
+        
+        if (key === 'resume' && value instanceof File) {
+          // Append file separately
+          formData.append('resume', value);
+        } else if (key === 'courses_type' || key === 'skill' || key === 'career_interest') {
+          // Append arrays as JSON strings
+          formData.append(key, JSON.stringify(value));
+        } else if (value !== null && value !== undefined) {
+          // Append other fields
+          formData.append(key, String(value));
+        }
+      });
 
-    const response = await apiService.post(
-      `method/stridenex_app.api_stridenex_app.student.student.create_student`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-    
-    return response;
+      for (let pair of formData.entries()) {}
+
+      const response = await apiService.post(
+        `method/stridenex_app.api_stridenex_app.student.student.create_student`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      return response;
   } catch (error) {
     console.error("Error creating student:", error);
     throw error;

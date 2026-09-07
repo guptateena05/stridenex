@@ -201,8 +201,6 @@ export default function DynamicField({ field, value, onChange, error }: Props) {
         responseData = response.data;
       }
 
-      console.log(`API Response for ${field.fieldname}:`, responseData);
-
       let data = [];
       let nextFlag = false;
       let prevFlag = false;

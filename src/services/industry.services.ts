@@ -308,7 +308,6 @@ export const getStudentApplicationList = async (industry: string) => {
     const response = await apiService.get(
       `method/stridenex_app.stridenex_app.doctype.internship_application.internship_application.get_student_application_list?industry=${encodeURIComponent(industry)}`
     );
-    console.log(response, "response")
     return response;
   } catch (error) {
     console.error("Error fetching student application list:", error);

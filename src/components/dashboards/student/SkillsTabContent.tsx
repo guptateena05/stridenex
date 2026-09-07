@@ -149,7 +149,6 @@ export default function SkillsTabContent() {
         }
       }
 
-      console.log(scoreRes)
       if (scoreRes?.message) {
         setOverallScore(scoreRes?.message || 0);
       }

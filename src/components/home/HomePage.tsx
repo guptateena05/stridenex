@@ -21,27 +21,11 @@ export default function HomePage({ appName = "StrideNex" }: HomePageProps) {
   const { isAuthenticated, currentUser, fullName } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // Debug logs
-  console.log("🔥 HomePage Auth State:", { 
-    isAuthenticated, 
-    currentUser, 
-    fullName,
-    showWelcome 
-  });
-
   useEffect(() => {
     // Check if user is authenticated and we haven't shown the popup yet
     const hasSeenWelcome = sessionStorage.getItem("hasSeenWelcome");
-    
-    console.log("📝 Checking popup conditions:", {
-      isAuthenticated,
-      hasCurrentUser: !!currentUser,
-      hasSeenWelcome,
-      fullName
-    });
-    
+
     if (isAuthenticated && currentUser && !hasSeenWelcome) {
-      console.log("✅ Showing welcome popup for:", currentUser);
       // Show popup after a tiny delay to ensure everything is loaded
       setTimeout(() => {
         setShowWelcome(true);

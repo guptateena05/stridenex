@@ -178,8 +178,6 @@ export default function PipelineTabContent() {
         [];
 
       if (Array.isArray(apiData)) {
-        console.log(`Pipeline: Fetched ${apiData.length} applications for ${compName}`);
-        
         const newCandidates: Record<string, Candidate[]> = {
           "Applied": [],
           "Shortlisted": [],
@@ -189,7 +187,7 @@ export default function PipelineTabContent() {
           "Selected": [],
           "Accepted": []
         };
-        
+
         apiData.forEach((app: any) => {
           const email = app.email_id || app.student || "Student";
           
@@ -230,7 +228,7 @@ export default function PipelineTabContent() {
             newCandidates["Applied"].push(candidate);
           }
         });
-        
+
         setCandidates(newCandidates);
         setError(null);
       }

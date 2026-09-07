@@ -287,13 +287,9 @@ export default function CommunityTabContent() {
     }
   };
 
-  const handleLike = (postId: string) => {
-    console.log("Liking post:", postId);
-  };
+  const handleLike = (postId: string) => {};
 
-  const handleShare = (postId: string) => {
-    console.log("Sharing post:", postId);
-  };
+  const handleShare = (postId: string) => {};
 
   return (
     <motion.div
