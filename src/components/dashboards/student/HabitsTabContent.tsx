@@ -638,15 +638,11 @@ export default function HabitsTabContent() {
 
             // Process pending habits
             if (pendingRes?.message && Array.isArray(pendingRes.message)) {
-                console.log("Pending habits from API:", pendingRes.message);
                 setPendingHabits(pendingRes.message);
-            } else {
-                console.log("No pending habits or invalid response:", pendingRes);
-            }
+            } else {}
 
             // Process habit plans from getStudentPlans API (always process to ensure we get all plans)
             if (plansRes?.message && Array.isArray(plansRes.message)) {
-                console.log("Plans from API:", plansRes.message);
                 setHabitPlans(mapPlansFromAPI(plansRes.message));
             }
 

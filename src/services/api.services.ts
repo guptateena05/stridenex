@@ -36,9 +36,9 @@ const apiRequest = async (config: AxiosRequestConfig) => {
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.status >= 400 && error.response.status < 500) {
-      console.warn(`API Warning (${config.method} ${config.url}):`, error.message || error);
+      console.warn(`API Warning (${config.method} ${config.url}):`, error.message || "Request failed");
     } else {
-      console.error(`API Error (${config.method} ${config.url}):`, error);
+      console.error(`API Error (${config.method} ${config.url}):`, error.message || "Request failed");
     }
 
     if (error.response && error.response.data) {

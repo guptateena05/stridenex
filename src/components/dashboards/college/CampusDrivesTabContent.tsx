@@ -1033,7 +1033,6 @@ export default function CampusDrivesTabContent() {
         designations: editingDrive.designations || [],
         required_skills: editingDrive.required_skills || []
       };
-      console.log("CampusDrivesTabContent: computed initialValues:", vals);
       return vals;
     }
     return {};

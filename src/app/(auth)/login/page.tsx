@@ -121,7 +121,6 @@ export default function LoginPage() {
       );
 
       const data = await response.json();
-      console.log("Login response:", data);
 
       if (data.message === "Logged In") {
         const { api_key, api_secret } = data.key_details;

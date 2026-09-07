@@ -90,7 +90,6 @@ export default function StudentDashboardPage() {
     const fetchStats = async () => {
       try {
         const res = await getDashboardStats(currentUser);
-        console.log("Student stats API response:", res);
         const data = res?.data || res?.message;
         if (data) {
           setStatsData(data);
@@ -111,7 +110,6 @@ export default function StudentDashboardPage() {
     const fetchLearningActivity = async () => {
       try {
         const res = await getLearningActivity(currentUser);
-        console.log("Student learning activity API response:", res);
         const data = res?.data || res?.message;
         if (data) {
           setLearningActivityData(data);
@@ -128,7 +126,6 @@ export default function StudentDashboardPage() {
     const fetchAlerts = async () => {
       try {
         const res = await getTodaysOpportunityAlerts(currentUser);
-        console.log("Student opportunity alerts response:", res);
         const data = res?.data || res?.message;
 
         if (data) {

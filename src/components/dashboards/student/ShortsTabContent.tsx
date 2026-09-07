@@ -742,7 +742,6 @@ export default function ShortsTabContent() {
 
     try {
       const res = await toggleLikeComment({ comment: commentId });
-      console.log("Toggle comment like response:", res);
 
       const serverLikeCount = res?.message?.like_count !== undefined 
         ? Number(res.message.like_count) 
@@ -822,14 +821,13 @@ export default function ShortsTabContent() {
     try {
       setLoadingSaved(true);
       const res = await getSavedShorts(currentUser);
-      console.log("Saved shorts response:", res);
       let rawSaved = [];
       if (res && Array.isArray(res.message)) {
         rawSaved = res.message;
       } else if (res && Array.isArray(res.data)) {
         rawSaved = res.data;
       }
-      
+
       // Match the correct property "short" from the Frappe response
       const savedIds = rawSaved.map((item: any) => String(item.short));
       setSavedItems(savedIds);
@@ -845,8 +843,7 @@ export default function ShortsTabContent() {
       try {
         setLoading(true);
         const res = await getShortsFeed(currentUser || undefined);
-        console.log("Shorts API response:", res);
-        
+
         let rawShorts = [];
         if (res && Array.isArray(res.message)) {
           rawShorts = res.message;
@@ -966,13 +963,11 @@ export default function ShortsTabContent() {
           user: currentUser,
           short_name: String(id)
         });
-        console.log("Unsave short API response:", res);
       } else {
         const res = await saveShort({
           user: currentUser,
           short_name: String(id)
         });
-        console.log("Save short API response:", res);
       }
 
       // Refresh list to keep in sync
@@ -1012,7 +1007,6 @@ export default function ShortsTabContent() {
       const res = await toggleLikeShort({
         short: String(id)
       });
-      console.log("Toggle like API response:", res);
 
       const serverLikeCount = res?.message?.like_count !== undefined 
         ? Number(res.message.like_count) 
@@ -1159,9 +1153,7 @@ export default function ShortsTabContent() {
           url: shareUrl,
         });
         return;
-      } catch (err) {
-        console.log('Share error, falling back to copy:', err);
-      }
+      } catch (err) {}
     }
 
     try {

@@ -314,7 +314,6 @@ export default function CollegeOnboarding({
       const response = await axios.get(
         `${BASE_URL}method/stridenex_app.api_stridenex_app.college.college.get_college?email=${encodeURIComponent(email)}`
       );
-      console.log("College API Response:", response.data);
 
       const resData = response.data?.data || response.data?.message?.data || response.data?.message || response.data;
       if (resData && (resData.college_name || resData.email)) {
@@ -961,7 +960,6 @@ export default function CollegeOnboarding({
               billing_details: [{ title: "Stridenex App" }]
             }
           };
-          console.log("Submitting College Billing registration payload:", billingPayload);
 
           const storedApiKey = localStorage.getItem("apiKey") || "";
           const storedApiSecret = localStorage.getItem("apiSecret") || "";
@@ -977,8 +975,6 @@ export default function CollegeOnboarding({
             billingPayload,
             { headers: billingHeaders }
           );
-
-          console.log("Billing API full response:", billingResponse.data);
 
           // Frappe wraps return values inside "message", so check the correct path
           const billingResult = billingResponse.data?.message || billingResponse.data;

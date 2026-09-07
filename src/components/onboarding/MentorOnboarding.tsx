@@ -839,7 +839,6 @@ export default function MentorOnboarding({
                 gstin: formData.has_gst ? formData.gstin?.toUpperCase()?.trim() || "" : ""
               }
             };
-            console.log("Submitting Mentor Billing registration payload:", billingPayload);
 
             const storedApiKey = localStorage.getItem("apiKey") || "";
             const storedApiSecret = localStorage.getItem("apiSecret") || "";
@@ -855,8 +854,6 @@ export default function MentorOnboarding({
               billingPayload,
               { headers: billingHeaders }
             );
-
-            console.log("Billing API full response:", billingResponse.data);
 
             // Frappe wraps return values inside "message", so check the correct path
             const billingResult = billingResponse.data?.message || billingResponse.data;
@@ -1586,7 +1583,6 @@ export default function MentorOnboarding({
           fields: ["skill_name"],
         },
         mapOptions: (data) => {
-          console.log("Skills data received:", data);
           const items = data.data || data || [];
           return items.map((item: any) => ({
             value: item.name || item.skill_name,

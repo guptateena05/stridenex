@@ -338,9 +338,6 @@ export default function MentorsTabContent() {
       const initResponse = await initiateSessionBooking(sessionPayload);
       const initData = initResponse?.message ?? initResponse;
 
-      // Debug: log what the backend actually returned
-      console.log("[initiateSessionBooking] initData:", initData);
-
       // Free-session fast path
       if (initData?.payment_required === false) {
         setSelectedMentorForBooking(null);
@@ -443,7 +440,6 @@ export default function MentorsTabContent() {
       });
 
       rzp.open();
-
     } catch (err) {
       console.error("Error during booking flow:", err);
       alert(err instanceof Error ? err.message : "Failed to initiate booking. Please try again.");
@@ -709,7 +705,6 @@ export default function MentorsTabContent() {
       setLoading(true);
       setError(null);
       const response = await getMentorList(page, PAGE_SIZE, search);
-      console.log(response, 'response');
 
       const dataObj = response?.data || {};
       const mentorList = dataObj.Mentor || [];

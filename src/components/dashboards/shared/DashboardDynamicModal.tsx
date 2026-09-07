@@ -103,7 +103,6 @@ export default function DashboardDynamicModal({
   useEffect(() => {
     if (isOpen && initialValues) {
       const currentInitialStr = JSON.stringify(initialValues);
-      console.log("DashboardDynamicModal: initialValues changed:", initialValues);
 
       // Only update if the stringified values have actually changed or it's the first load
       if (lastInitialValuesRef.current !== currentInitialStr) {
@@ -115,7 +114,6 @@ export default function DashboardDynamicModal({
           }
           initial[field.name] = val ?? (field.multiple ? [] : (field.type === "number" ? "" : ""));
         });
-        console.log("DashboardDynamicModal: setting formData from initialValues:", initial);
         setFormData(initial);
         lastInitialValuesRef.current = currentInitialStr;
       }
@@ -236,7 +234,6 @@ export default function DashboardDynamicModal({
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
     }
-    console.log("DashboardDynamicModal: handleFormSubmit called. formData:", formData);
 
     // Perform validation
     const newErrors: Record<string, string> = {};
@@ -289,7 +286,6 @@ export default function DashboardDynamicModal({
       return;
     }
 
-    console.log("DashboardDynamicModal: Validation passed. Calling onSubmit...");
     try {
       await onSubmit(formData);
     } catch (err: any) {
