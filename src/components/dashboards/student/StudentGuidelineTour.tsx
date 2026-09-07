@@ -54,7 +54,6 @@ export default function StudentGuidelineTour({ studentEmail }: StudentGuidelineT
         setLoading(true);
         try {
             const res = await getStudentGuidelines("Student", null, studentEmail);
-            console.log("Guidelines response:", res);
             const data = res?.message || res?.data;
             if (data && Array.isArray(data.steps) && data.steps.length > 0) {
                 // Sort steps by step_no

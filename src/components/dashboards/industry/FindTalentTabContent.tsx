@@ -136,7 +136,6 @@ export default function FindTalentTabContent() {
           page: currentPage,
           page_size: PAGE_SIZE
         });
-        console.log("Student API Response:", response);
 
         const dataObj = response?.data || response?.message?.data || response?.message || response || {};
         const studentsList = dataObj?.students || (Array.isArray(dataObj) ? dataObj : []);

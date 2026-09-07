@@ -50,8 +50,7 @@ export default function StoriesTabContent() {
         try {
             setLoading(true);
             const res = await getSuccessStories();
-            console.log("Success stories API raw response:", res);
-            
+
             let fetchedStories: any[] = [];
             if (res) {
                 if (Array.isArray(res)) {

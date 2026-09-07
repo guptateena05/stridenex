@@ -184,7 +184,6 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
     setFieldErrors({});
-    console.log('selected role', selectedRole)
     const rolePayload = [
       { student: selectedRole === "student" ? 1 : 0 },
       { college: selectedRole === "college" ? 1 : 0 },
@@ -209,38 +208,37 @@ export default function SignupPage() {
     })
       .then(response => response.json())
       .then(responseData => {
-        console.log("API Response:", responseData);
-        if (responseData?.message === "User created successfully") {
-          localStorage.setItem("userEmail", data.email);
-          localStorage.setItem("userFirstName", data.firstName);
-          localStorage.setItem("userLastName", data.lastName);
-          localStorage.setItem("userPassword", data.password);
+      if (responseData?.message === "User created successfully") {
+        localStorage.setItem("userEmail", data.email);
+        localStorage.setItem("userFirstName", data.firstName);
+        localStorage.setItem("userLastName", data.lastName);
+        localStorage.setItem("userPassword", data.password);
 
-          // Navigate based on selected role
-          if (selectedRole === "student") {
-            router.push("/onboarding/student");
-          } else if (selectedRole === "mentor") {
-            router.push("/onboarding/mentor");
-          } else if (selectedRole === "college") {
-            router.push("/onboarding/college");
-          } else if (selectedRole === "industry") {
-            router.push("/onboarding/industry");
-          }
-        } else {
-          // Handle different error structures
-          const errorMsg = responseData?.message ||
-            responseData?.message?.error ||
-            "Signup failed";
-
-          if (errorMsg.toLowerCase().includes("user already exists") || errorMsg.toLowerCase().includes("email already registered")) {
-            setFieldErrors(prev => ({ ...prev, email: "User already exists with this email" }));
-            setError("");
-          } else {
-            setError(errorMsg);
-          }
-          setLoading(false);
+        // Navigate based on selected role
+        if (selectedRole === "student") {
+          router.push("/onboarding/student");
+        } else if (selectedRole === "mentor") {
+          router.push("/onboarding/mentor");
+        } else if (selectedRole === "college") {
+          router.push("/onboarding/college");
+        } else if (selectedRole === "industry") {
+          router.push("/onboarding/industry");
         }
-      })
+      } else {
+        // Handle different error structures
+        const errorMsg = responseData?.message ||
+          responseData?.message?.error ||
+          "Signup failed";
+
+        if (errorMsg.toLowerCase().includes("user already exists") || errorMsg.toLowerCase().includes("email already registered")) {
+          setFieldErrors(prev => ({ ...prev, email: "User already exists with this email" }));
+          setError("");
+        } else {
+          setError(errorMsg);
+        }
+        setLoading(false);
+      }
+    })
       .catch(err => {
         console.error("Fetch error:", err);
         setError("An error occurred during signup");

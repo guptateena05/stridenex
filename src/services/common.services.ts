@@ -32,7 +32,6 @@ export const getBillingUrl = async (fromSite: string): Promise<string> => {
     if (!billingUrl) {
       throw new Error("Billing URL not returned from server");
     }
-    console.log("getBillingUrl response:", billingUrl);
     return billingUrl;
   } catch (error) {
     console.error("Error fetching billing URL:", error);
