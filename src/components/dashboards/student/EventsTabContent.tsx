@@ -462,7 +462,6 @@ export default function EventsTabContent() {
                         <span className="text-[10px] text-slate-400 font-medium">{notice.date}</span>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition-colors flex-shrink-0" />
                   </div>
                 </BaseCard>
               );

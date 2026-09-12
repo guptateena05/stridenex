@@ -9,7 +9,7 @@ import { BASE_DOMAIN } from "@/services/api.services";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import ReactPlayer from "react-player";
-import { 
+import {
   Play,
   Pause,
   Volume2,
@@ -258,17 +258,17 @@ const recommendedShorts: RecommendedShort[] = [
 ];
 
 // Video Player Component
-function VideoPlayer({ 
-  video, 
-  isActive, 
-  isMuted, 
+function VideoPlayer({
+  video,
+  isActive,
+  isMuted,
   setIsMuted,
   playing,
   setPlaying
-}: { 
-  video: ShortVideo; 
-  isActive: boolean; 
-  isMuted: boolean; 
+}: {
+  video: ShortVideo;
+  isActive: boolean;
+  isMuted: boolean;
   setIsMuted: (m: boolean) => void;
   playing: boolean;
   setPlaying: (p: boolean) => void;
@@ -298,12 +298,12 @@ function VideoPlayer({
         setLoadingVideo(true);
         const apiKey = typeof window !== "undefined" ? localStorage.getItem("apiKey") : null;
         const apiSecret = typeof window !== "undefined" ? localStorage.getItem("apiSecret") : null;
-        
+
         const headers: Record<string, string> = {};
         if (apiKey && apiSecret) {
           headers["Authorization"] = `token ${apiKey}:${apiSecret}`;
         }
-        
+
         const response = await fetch(video.videoUrl, { headers });
         if (!response.ok) {
           console.warn(`Secure video fetch returned status ${response.status}, falling back to direct URL.`);
@@ -312,7 +312,7 @@ function VideoPlayer({
           }
           return;
         }
-        
+
         const blob = await response.blob();
         if (active) {
           objectUrl = URL.createObjectURL(blob);
@@ -350,7 +350,7 @@ function VideoPlayer({
   };
 
   return (
-    <div 
+    <div
       className="w-full h-full relative flex items-center justify-center cursor-pointer select-none"
       onClick={handlePlayPause}
     >
@@ -382,7 +382,7 @@ function VideoPlayer({
           }}
         />
       ) : null}
-      
+
       {/* Transient Play/Pause Overlay indicator */}
       {!playing && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/35 z-10 transition-all pointer-events-none">
@@ -485,7 +485,7 @@ export default function ShortsTabContent() {
       };
       setShortsList(prev => [...prev, mappedShort]);
     }
-    
+
     setTimeout(() => {
       const el = document.getElementById(`short-card-${shortId}`);
       if (el) {
@@ -501,14 +501,19 @@ export default function ShortsTabContent() {
     try {
       setPlaylistsLoading(true);
       const res = await getStudentPlaylists(currentUser);
+      const responseData = res?.data || res;
       let rawPlaylists = [];
-      if (res && Array.isArray(res.message)) {
-        rawPlaylists = res.message;
-      } else if (res && Array.isArray(res.data)) {
-        rawPlaylists = res.data;
-      } else if (res && res.message && Array.isArray(res.message.data)) {
-        rawPlaylists = res.message.data;
+      
+      if (Array.isArray(responseData)) {
+        rawPlaylists = responseData;
+      } else if (responseData?.message && Array.isArray(responseData.message)) {
+        rawPlaylists = responseData.message;
+      } else if (responseData?.message?.data && Array.isArray(responseData.message.data)) {
+        rawPlaylists = responseData.message.data;
+      } else if (responseData?.data && Array.isArray(responseData.data)) {
+        rawPlaylists = responseData.data;
       }
+      
       setPlaylists(rawPlaylists);
     } catch (err) {
       console.error("Error loading student playlists:", err);
@@ -566,12 +571,12 @@ export default function ShortsTabContent() {
     const mapComment = (item: any): any => {
       const commentId = String(item.name || item.id || Math.random());
       const authorEmail = item.comment_by || item.owner || item.user || item.author || "Anonymous";
-      const authorName = authorEmail.includes("@") 
+      const authorName = authorEmail.includes("@")
         ? authorEmail.split("@")[0].split(/[._-]/).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
         : authorEmail;
       const initials = authorName.substring(0, 2).toUpperCase() || "AN";
       const timeStr = item.creation ? item.creation.substring(0, 16) : (item.time || "Just now");
-      
+
       const nestedReplies = Array.isArray(item.replies) ? item.replies.map(mapComment) : [];
 
       return {
@@ -743,17 +748,17 @@ export default function ShortsTabContent() {
     try {
       const res = await toggleLikeComment({ comment: commentId });
 
-      const serverLikeCount = res?.message?.like_count !== undefined 
-        ? Number(res.message.like_count) 
-        : (res?.data?.message?.like_count !== undefined 
-            ? Number(res.data.message.like_count) 
-            : null);
+      const serverLikeCount = res?.message?.like_count !== undefined
+        ? Number(res.message.like_count)
+        : (res?.data?.message?.like_count !== undefined
+          ? Number(res.data.message.like_count)
+          : null);
 
       const serverIsLiked = res?.message?.is_liked !== undefined
         ? Boolean(res.message.is_liked)
         : (res?.data?.message?.is_liked !== undefined
-            ? Boolean(res.data.message.is_liked)
-            : !isAlreadyLiked);
+          ? Boolean(res.data.message.is_liked)
+          : !isAlreadyLiked);
 
       if (serverLikeCount !== null) {
         setCommentsList(prev => updateCommentInList(prev, commentId, (c) => ({
@@ -791,9 +796,8 @@ export default function ShortsTabContent() {
         <div className="flex items-center gap-3.5 mt-1">
           <button
             onClick={() => handleToggleLikeComment(comment.id)}
-            className={`text-[11px] font-semibold flex items-center gap-1 transition-colors ${
-              comment.isLiked ? "text-orange-500" : "text-zinc-500 hover:text-orange-500"
-            }`}
+            className={`text-[11px] font-semibold flex items-center gap-1 transition-colors ${comment.isLiked ? "text-orange-500" : "text-zinc-500 hover:text-orange-500"
+              }`}
           >
             <Heart className={`w-3 h-3 ${comment.isLiked ? "fill-orange-500 text-orange-500" : ""}`} />
             <span>{comment.likes}</span>
@@ -858,7 +862,7 @@ export default function ShortsTabContent() {
         const mapped = rawShorts.map((item: any): ShortVideo => {
           const videoUrl = item.video ? (item.video.startsWith('http') ? item.video : `${BASE_DOMAIN}${item.video}`) : '';
           const thumbnail = item.thumbnail ? (item.thumbnail.startsWith('http') ? item.thumbnail : `${BASE_DOMAIN}${item.thumbnail}`) : undefined;
-          
+
           const skill = item.skill || "Skill";
           const authorAvatar = skill.substring(0, 2).toUpperCase();
 
@@ -883,11 +887,11 @@ export default function ShortsTabContent() {
             category: skill,
             duration: item.duration_display || `${item.duration_seconds || 30} sec`,
             views: item.views_display || `${item.view_count || 0}`,
-            likes: item.like_count !== undefined 
-              ? String(item.like_count) 
-              : (item.likes_count !== undefined 
-                  ? String(item.likes_count) 
-                  : (item.likes !== undefined ? String(item.likes) : "0")),
+            likes: item.like_count !== undefined
+              ? String(item.like_count)
+              : (item.likes_count !== undefined
+                ? String(item.likes_count)
+                : (item.likes !== undefined ? String(item.likes) : "0")),
             commentCount: item.comment_count !== undefined ? Number(item.comment_count) : (item.comments_count !== undefined ? Number(item.comments_count) : 0),
             author: "StrideNex",
             authorHandle: "@stridenex",
@@ -906,17 +910,17 @@ export default function ShortsTabContent() {
         const counts: Record<string, number> = {};
         const likesMap: Record<string, number> = {};
         rawShorts.forEach((item: any) => {
-          const commentCountVal = item.comment_count !== undefined 
-            ? item.comment_count 
-            : (item.comments_count !== undefined 
-                ? item.comments_count 
-                : (item.comments !== undefined && Array.isArray(item.comments) ? item.comments.length : 0));
+          const commentCountVal = item.comment_count !== undefined
+            ? item.comment_count
+            : (item.comments_count !== undefined
+              ? item.comments_count
+              : (item.comments !== undefined && Array.isArray(item.comments) ? item.comments.length : 0));
           counts[String(item.name)] = Number(commentCountVal);
-          likesMap[String(item.name)] = item.like_count !== undefined 
-            ? Number(item.like_count) 
-            : (item.likes_count !== undefined 
-                ? Number(item.likes_count) 
-                : (item.likes !== undefined ? Number(item.likes) : 0));
+          likesMap[String(item.name)] = item.like_count !== undefined
+            ? Number(item.like_count)
+            : (item.likes_count !== undefined
+              ? Number(item.likes_count)
+              : (item.likes !== undefined ? Number(item.likes) : 0));
         });
         setLocalCommentCounts(counts);
         setLikeCounts(likesMap);
@@ -972,7 +976,7 @@ export default function ShortsTabContent() {
 
       // Refresh list to keep in sync
       fetchSaved();
-      
+
       if (!isAlreadySaved) {
         showToast("Short saved successfully!", "success");
       } else {
@@ -981,7 +985,7 @@ export default function ShortsTabContent() {
     } catch (err: any) {
       console.error("Error saving short via API:", err);
       showToast(err.message || "Failed to save short", "error");
-      
+
       // Rollback UI update
       setSavedItems(prev =>
         isAlreadySaved ? [...prev, String(id)] : prev.filter(item => item !== String(id))
@@ -1008,11 +1012,11 @@ export default function ShortsTabContent() {
         short: String(id)
       });
 
-      const serverLikeCount = res?.message?.like_count !== undefined 
-        ? Number(res.message.like_count) 
-        : (res?.data?.message?.like_count !== undefined 
-            ? Number(res.data.message.like_count) 
-            : null);
+      const serverLikeCount = res?.message?.like_count !== undefined
+        ? Number(res.message.like_count)
+        : (res?.data?.message?.like_count !== undefined
+          ? Number(res.data.message.like_count)
+          : null);
       if (serverLikeCount !== null) {
         setLikeCounts(prev => ({
           ...prev,
@@ -1153,7 +1157,7 @@ export default function ShortsTabContent() {
           url: shareUrl,
         });
         return;
-      } catch (err) {}
+      } catch (err) { }
     }
 
     try {
@@ -1182,7 +1186,7 @@ export default function ShortsTabContent() {
     const originallyLiked = likedIdsFromFeedOnLoad.current.has(String(short.id));
     const isCurrentlyLiked = likedItems.includes(String(short.id));
     const baseLikes = parseInt(short.likes || "0") || 0;
-    
+
     if (originallyLiked && !isCurrentlyLiked) {
       return Math.max(0, baseLikes - 1);
     } else if (!originallyLiked && isCurrentlyLiked) {
@@ -1242,11 +1246,11 @@ export default function ShortsTabContent() {
           <p className="text-zinc-650 text-zinc-500 text-xs mt-1.5">Check back later or save shorts from the home feed</p>
         </div>
       ) : (
-        <div 
+        <div
           ref={containerRef}
           className="w-full flex-1 overflow-y-auto snap-y snap-mandatory scroll-smooth flex flex-col items-center hide-scrollbar select-none"
-          style={{ 
-            scrollbarWidth: 'none', 
+          style={{
+            scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch',
             height: '100%'
@@ -1268,7 +1272,7 @@ export default function ShortsTabContent() {
                 {/* Ambient Mode Backdrop Glow */}
                 {ambientMode && (
                   <div className="absolute inset-0 w-full h-full flex items-center justify-center opacity-30 blur-[120px] pointer-events-none z-0">
-                    <div 
+                    <div
                       className="w-[360px] aspect-[9/16] rounded-full transition-all duration-1000 bg-orange-500/80"
                       style={{
                         background: 'radial-gradient(circle, rgba(249,115,22,0.8) 0%, rgba(249,115,22,0) 70%)'
@@ -1281,100 +1285,99 @@ export default function ShortsTabContent() {
                   {/* Relative container matching card size to align actions panel at the bottom right */}
                   <div className="relative aspect-[9/16] h-full max-h-[720px] flex items-end">
                     {/* Centered Video Player Card */}
-                    <div 
+                    <div
                       id={`player-wrapper-${short.id}`}
                       className="w-full h-full rounded-2xl overflow-hidden bg-black border border-zinc-800 shadow-2xl flex items-center justify-center group animate-fadeIn"
                     >
-                    <VideoPlayer 
-                      video={short} 
-                      isActive={isActive} 
-                      isMuted={isMuted} 
-                      setIsMuted={setIsMuted}
-                      playing={activePlaying}
-                      setPlaying={setActivePlaying}
-                    />
+                      <VideoPlayer
+                        video={short}
+                        isActive={isActive}
+                        isMuted={isMuted}
+                        setIsMuted={setIsMuted}
+                        playing={activePlaying}
+                        setPlaying={setActivePlaying}
+                      />
 
-                    {/* Video Header Controls overlay */}
-                    <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/70 to-transparent p-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-auto">
-                      {/* Top Left: Play/Pause and Volume controls */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActivePlaying(!activePlaying);
-                          }}
-                          className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-all backdrop-blur-sm shadow-md"
-                          title={activePlaying ? "Pause" : "Play"}
-                        >
-                          {activePlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white ml-0.5" />}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsMuted(!isMuted);
-                          }}
-                          className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-all backdrop-blur-sm shadow-md"
-                          title={isMuted ? "Unmute" : "Mute"}
-                        >
-                          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                        </button>
-                      </div>
-
-                      {/* Top Right: Three-dots and Floating Options Menu */}
-                      <div className="flex items-center gap-2 relative">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenMenuShortId(openMenuShortId === short.id ? null : short.id);
-                          }}
-                          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all backdrop-blur-sm shadow-md ${
-                            openMenuShortId === short.id 
-                              ? 'bg-orange-500 text-white' 
-                              : 'bg-black/40 hover:bg-black/60 text-white'
-                          }`}
-                          title="Options"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
-
-                        {openMenuShortId === short.id && (
-                          <div 
-                            className="absolute right-0 top-11 bg-white rounded-xl py-1.5 shadow-2xl z-40 text-slate-800 pointer-events-auto border border-slate-200/85 w-44 animate-fadeIn"
-                            onClick={(e) => e.stopPropagation()}
+                      {/* Video Header Controls overlay */}
+                      <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/70 to-transparent p-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-auto">
+                        {/* Top Left: Play/Pause and Volume controls */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActivePlaying(!activePlaying);
+                            }}
+                            className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-all backdrop-blur-sm shadow-md"
+                            title={activePlaying ? "Pause" : "Play"}
                           >
-                            {/* Options List */}
-                            <div className="flex flex-col">
-                              {/* Saved / Unsave item */}
-                              <button
-                                onClick={() => {
-                                  toggleSave(short.id);
-                                  setOpenMenuShortId(null);
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors text-xs font-semibold text-slate-700"
-                              >
-                                {isSaved ? (
-                                  <BookmarkCheck className="w-4 h-4 text-orange-500" />
-                                ) : (
-                                  <Bookmark className="w-4 h-4 text-slate-500" />
-                                )}
-                                <span>Saved</span>
-                              </button>
+                            {activePlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white ml-0.5" />}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsMuted(!isMuted);
+                            }}
+                            className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-all backdrop-blur-sm shadow-md"
+                            title={isMuted ? "Unmute" : "Mute"}
+                          >
+                            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                          </button>
+                        </div>
 
-                              {/* Add to Playlist */}
-                              <button
-                                onClick={() => {
-                                  setPlaylistShortId(short.id);
-                                  setIsPlaylistModalOpen(true);
-                                  setOpenMenuShortId(null);
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors text-xs font-semibold text-slate-700"
-                              >
-                                <Plus className="w-4 h-4 text-slate-500" />
-                                <span>Add to Playlist</span>
-                              </button>
+                        {/* Top Right: Three-dots and Floating Options Menu */}
+                        <div className="flex items-center gap-2 relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuShortId(openMenuShortId === short.id ? null : short.id);
+                            }}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all backdrop-blur-sm shadow-md ${openMenuShortId === short.id
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-black/40 hover:bg-black/60 text-white'
+                              }`}
+                            title="Options"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
 
-                              {/* Not Interested */}
-                              <button
+                          {openMenuShortId === short.id && (
+                            <div
+                              className="absolute right-0 top-11 bg-white rounded-xl py-1.5 shadow-2xl z-40 text-slate-800 pointer-events-auto border border-slate-200/85 w-44 animate-fadeIn"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {/* Options List */}
+                              <div className="flex flex-col">
+                                {/* Saved / Unsave item */}
+                                <button
+                                  onClick={() => {
+                                    toggleSave(short.id);
+                                    setOpenMenuShortId(null);
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors text-xs font-semibold text-slate-700"
+                                >
+                                  {isSaved ? (
+                                    <BookmarkCheck className="w-4 h-4 text-orange-500" />
+                                  ) : (
+                                    <Bookmark className="w-4 h-4 text-slate-500" />
+                                  )}
+                                  <span>Saved</span>
+                                </button>
+
+                                {/* Add to Playlist */}
+                                <button
+                                  onClick={() => {
+                                    setPlaylistShortId(short.id);
+                                    setIsPlaylistModalOpen(true);
+                                    setOpenMenuShortId(null);
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors text-xs font-semibold text-slate-700"
+                                >
+                                  <Plus className="w-4 h-4 text-slate-500" />
+                                  <span>Add to Playlist</span>
+                                </button>
+
+                                {/* Not Interested */}
+                                {/* <button
                                 onClick={() => {
                                   showToast("We will recommend fewer videos like this.", "success");
                                   setOpenMenuShortId(null);
@@ -1383,62 +1386,62 @@ export default function ShortsTabContent() {
                               >
                                 <Compass className="w-4 h-4 text-slate-500" />
                                 <span>Not Interested</span>
-                              </button>
+                              </button> */}
 
-                              <div className="h-[1px] bg-slate-100 my-1" />
+                                {/* <div className="h-[1px] bg-slate-100 my-1" /> */}
 
-                              {/* Report Video */}
-                              <button
-                                onClick={() => {
-                                  showToast("Thank you. Video has been flagged for review.", "info");
-                                  setOpenMenuShortId(null);
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors text-xs font-semibold text-red-500"
-                              >
-                                <X className="w-4 h-4 text-red-500" />
-                                <span>Report Video</span>
-                              </button>
+                                {/* Report Video */}
+                                {/* <button
+                                  onClick={() => {
+                                    showToast("Thank you. Video has been flagged for review.", "info");
+                                    setOpenMenuShortId(null);
+                                  }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors text-xs font-semibold text-red-500"
+                                >
+                                  <X className="w-4 h-4 text-red-500" />
+                                  <span>Report Video</span>
+                                </button> */}
+                              </div>
                             </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Bottom-left Details Overlay */}
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 pt-20 flex flex-col justify-end text-white z-20 pointer-events-none">
+                        {/* Author/Creator details */}
+                        <div className="flex items-center gap-2.5 mb-3 pointer-events-auto">
+                          <Avatar className="w-9 h-9 border border-white/20 shadow-md">
+                            <AvatarFallback className="text-xs bg-orange-500 text-white font-bold">
+                              {short.authorAvatar}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-bold tracking-wide text-zinc-100 drop-shadow-sm">{short.authorHandle}</span>
+                        </div>
+
+                        {/* Video Title and Description */}
+                        <h3 className="font-semibold text-sm text-zinc-100 line-clamp-2 mb-2 leading-snug pointer-events-auto select-text drop-shadow">
+                          {short.title}
+                        </h3>
+                        {short.description && (
+                          <p className="text-xs text-zinc-300 line-clamp-2 mb-3.5 leading-relaxed pointer-events-auto select-text drop-shadow-sm">
+                            {short.description}
+                          </p>
+                        )}
+
+                        {/* Video Tags */}
+                        {short.tags && short.tags.length > 0 && (
+                          <div className="flex gap-1.5 flex-wrap pointer-events-auto">
+                            {short.tags.map((tag) => (
+                              <span key={tag} className="text-xs font-semibold text-orange-400 hover:text-orange-500 hover:underline cursor-pointer transition-all drop-shadow-sm">
+                                {tag}
+                              </span>
+                            ))}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Bottom-left Details Overlay */}
-                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 pt-20 flex flex-col justify-end text-white z-20 pointer-events-none">
-                      {/* Author/Creator details */}
-                      <div className="flex items-center gap-2.5 mb-3 pointer-events-auto">
-                        <Avatar className="w-9 h-9 border border-white/20 shadow-md">
-                          <AvatarFallback className="text-xs bg-orange-500 text-white font-bold">
-                            {short.authorAvatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-bold tracking-wide text-zinc-100 drop-shadow-sm">{short.authorHandle}</span>
-                      </div>
- 
-                      {/* Video Title and Description */}
-                      <h3 className="font-semibold text-sm text-zinc-100 line-clamp-2 mb-2 leading-snug pointer-events-auto select-text drop-shadow">
-                        {short.title}
-                      </h3>
-                      {short.description && (
-                        <p className="text-xs text-zinc-300 line-clamp-2 mb-3.5 leading-relaxed pointer-events-auto select-text drop-shadow-sm">
-                          {short.description}
-                        </p>
-                      )}
- 
-                      {/* Video Tags */}
-                      {short.tags && short.tags.length > 0 && (
-                        <div className="flex gap-1.5 flex-wrap pointer-events-auto">
-                          {short.tags.map((tag) => (
-                            <span key={tag} className="text-xs font-semibold text-orange-400 hover:text-orange-500 hover:underline cursor-pointer transition-all drop-shadow-sm">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
- 
                     {/* Right Side Vertical Action Panel (aligned to bottom right of video card) */}
                     <div className="absolute left-full ml-4 bottom-0 flex flex-col items-center gap-2.5 pb-4 z-10 shrink-0 select-none">
                       {/* Like Button */}
@@ -1535,10 +1538,11 @@ export default function ShortsTabContent() {
       )}
 
       {/* Recommendations Slide-out Drawer */}
+      {/* Recommendations Slide-out Drawer */}
       <AnimatePresence>
-        {isRecommendationsOpen && createPortal(
+        {isRecommendationsOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-sm">
-            
+
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -1552,7 +1556,7 @@ export default function ShortsTabContent() {
                   <Sparkles className="w-5 h-5 text-orange-500 animate-pulse" />
                   <h2 className="text-base font-bold">Recommended for Your Gaps</h2>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsRecommendationsOpen(false)}
                   className="p-2 text-zinc-400 hover:text-white rounded-lg transition-colors"
                 >
@@ -1582,8 +1586,8 @@ export default function ShortsTabContent() {
                     </thead>
                     <tbody className="text-sm divide-y divide-zinc-800/85">
                       {recommendedShorts.map((short) => (
-                        <tr 
-                          key={short.id} 
+                        <tr
+                          key={short.id}
                           className="hover:bg-zinc-800/30 transition-colors group cursor-pointer"
                           onClick={() => {
                             const found = shortsList.find(s => String(s.title).toLowerCase() === String(short.title).toLowerCase() || s.category === short.category);
@@ -1622,16 +1626,15 @@ export default function ShortsTabContent() {
                 </div>
               </div>
             </motion.div>
-          </div>,
-          document.body
+          </div>
         )}
       </AnimatePresence>
 
       {/* Saved List Slide-out Drawer */}
       <AnimatePresence>
-        {isSavedListOpen && createPortal(
+        {isSavedListOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-sm">
-            
+
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -1647,7 +1650,7 @@ export default function ShortsTabContent() {
                     {selectedPlaylistForView ? `Playlist: ${selectedPlaylistForView.playlist_name}` : "Saved & Playlists"}
                   </h2>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsSavedListOpen(false)}
                   className="p-2 text-zinc-400 hover:text-white rounded-lg transition-colors"
                 >
@@ -1675,8 +1678,8 @@ export default function ShortsTabContent() {
                         {selectedPlaylistForView.shorts.map((shortItem: any, idx: number) => {
                           const icon = (shortItem.skill || "Skill").toLowerCase().includes("python") ? "🐍" : "🗄️";
                           return (
-                            <div 
-                              key={shortItem.name || shortItem.id || `short-${idx}`} 
+                            <div
+                              key={shortItem.name || shortItem.id || `short-${idx}`}
                               className="flex items-center gap-3.5 p-3.5 bg-zinc-800/30 hover:bg-zinc-800/60 border border-zinc-800 hover:border-zinc-700 rounded-xl group cursor-pointer transition-all"
                               onClick={() => playPlaylistShort(shortItem)}
                             >
@@ -1707,7 +1710,7 @@ export default function ShortsTabContent() {
                         </div>
                       ) : playlists.length === 0 ? (
                         <div className="text-center py-4 bg-zinc-800/20 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-medium">
-                          No custom playlists created yet.
+                          There is no content in playlists. Create a new playlist below.
                         </div>
                       ) : (
                         <div className="space-y-2">
@@ -1742,8 +1745,8 @@ export default function ShortsTabContent() {
                       ) : (
                         <div className="space-y-2">
                           {savedShortsList.map((saved) => (
-                            <div 
-                              key={saved.id} 
+                            <div
+                              key={saved.id}
                               className="flex items-center gap-3.5 p-3.5 bg-zinc-800/30 hover:bg-zinc-800/60 border border-zinc-800 hover:border-zinc-700 rounded-xl group cursor-pointer transition-all"
                               onClick={() => {
                                 const el = document.getElementById(`short-card-${saved.id}`);
@@ -1774,17 +1777,16 @@ export default function ShortsTabContent() {
                 )}
               </div>
             </motion.div>
-          </div>,
-          document.body
+          </div>
         )}
       </AnimatePresence>
 
       {/* Redesigned Dark Comments Drawer */}
       <AnimatePresence>
-        {isCommentsOpen && selectedShort && createPortal(
+        {isCommentsOpen && selectedShort && (
           <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-sm">
-            
-            <motion.div 
+
+            <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -1797,7 +1799,7 @@ export default function ShortsTabContent() {
                   <h2 className="text-base font-bold">Comments ({localCommentCounts[String(selectedShort.id)] !== undefined ? localCommentCounts[String(selectedShort.id)] : (selectedShort.commentCount ?? 0)})</h2>
                   <p className="text-xs text-zinc-400 line-clamp-1">{selectedShort.title}</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsCommentsOpen(false)}
                   className="p-2 text-zinc-400 hover:text-white rounded-lg transition-colors"
                 >
@@ -1856,16 +1858,15 @@ export default function ShortsTabContent() {
                 </Button>
               </div>
             </motion.div>
-          </div>,
-          document.body
+          </div>
         )}
       </AnimatePresence>
 
       {/* Description Modal Overlay */}
       <AnimatePresence>
-        {showDescriptionShort && createPortal(
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            
+        {showDescriptionShort && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1895,16 +1896,15 @@ export default function ShortsTabContent() {
                 {showDescriptionShort.description || "No description available."}
               </div>
             </motion.div>
-          </div>,
-          document.body
+          </div>
         )}
       </AnimatePresence>
 
       {/* Playlist Modal Overlay */}
       <AnimatePresence>
-        {isPlaylistModalOpen && createPortal(
+        {isPlaylistModalOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1923,7 +1923,7 @@ export default function ShortsTabContent() {
               <h3 className="text-base font-bold text-zinc-100 mb-4 mt-1 select-none">
                 Add to Playlist
               </h3>
-              
+
               {/* Playlists List */}
               <div className="max-h-60 overflow-y-auto pr-2 mb-4 space-y-2 hide-scrollbar">
                 {playlistsLoading ? (
@@ -1932,7 +1932,7 @@ export default function ShortsTabContent() {
                   </div>
                 ) : playlists.length === 0 ? (
                   <div className="text-center py-6 text-zinc-500 text-xs font-medium">
-                    No playlists found. Create one below!
+                    There is no content in playlists. Create one below!
                   </div>
                 ) : (
                   playlists.map((playlist, index) => (
@@ -1971,8 +1971,7 @@ export default function ShortsTabContent() {
                 </Button>
               </div>
             </motion.div>
-          </div>,
-          document.body
+          </div>
         )}
       </AnimatePresence>
     </div>
