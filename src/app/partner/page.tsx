@@ -154,7 +154,7 @@ export default function PartnerPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/logo.png"
+              src="/images/Logo.png"
               alt="StrideNex Logo"
               width={140}
               height={40}
