@@ -16,6 +16,7 @@ import SuccessStoriesFooter from "@/components/dashboards/student/SuccessStories
 import StudentGuidelineTour from "@/components/dashboards/student/StudentGuidelineTour";
 import PsychometricTestModal from "@/components/PsychometricTestModal";
 import { psychometricApi } from "@/services/psychometricApi";
+import { Sparkles } from "lucide-react";
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -289,25 +290,32 @@ export default function StudentDashboardPage() {
 
         {/* Main Content Grid */}
         <motion.div variants={item} className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Left Column (3/3 width since AI Coach is hidden) */}
+          {/* Left Column (Full width) */}
           <div className="lg:col-span-3">
             {/* Learning Activity Heatmap */}
             <div className="h-full">
               <HabitHeatmap studentEmail={currentUser || ""} />
             </div>
           </div>
+        </motion.div>
 
-          {/* Right Column (1/3 width) - Hidden for now as requested */}
-          {/* <div>
-          <div className="h-full">
-            <CoachWidget
-              data={{
-                message: "Great SQL progress! 🚀 You are top 15% in your cohort. Start your ML module next — 3 resources picked for your style.",
-                task: "Sklearn Ch.2 (45 min) + solve 2 classification problems."
-              }}
-            />
+        {/* Psychometric Assessment CTA Banner */}
+        <motion.div variants={item} className="bg-gradient-to-r from-indigo-50 via-white to-white border border-indigo-100 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shrink-0 shadow-inner">
+               <Sparkles className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-800 tracking-tight">Discover Your Ideal Career Path</h3>
+              <p className="text-sm text-slate-500 mt-0.5">Take the psychometric assessment to get personalized career and skill recommendations.</p>
+            </div>
           </div>
-        </div> */}
+          <button
+            onClick={() => setShowTestModal(true)}
+            className="w-full md:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-all shadow-md active:scale-95 whitespace-nowrap flex items-center justify-center gap-2"
+          >
+            Retake Assessment
+          </button>
         </motion.div>
 
         {/* Bottom Row */}

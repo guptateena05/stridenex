@@ -95,19 +95,21 @@ export const psychometricApi = {
             credentials: "include",
             headers: { "Content-Type": "application/json" }
         });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         return data.message || [];
     },
 
-    startNewTest: async (testType: string, email?: string): Promise<string> => {
+    startNewTest: async (testType: string, email?: string): Promise<any> => {
         const res = await fetch(`${getBackendUrl()}/api/method/nexedu.api.start_new_test`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ test_type: testType, email })
         });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
-        return data.message;
+        return data.message !== undefined ? data.message : data;
     },
 
     loadQuestion: async (screenName: string): Promise<QuestionData> => {
@@ -117,6 +119,7 @@ export const psychometricApi = {
             credentials: "include",
             body: JSON.stringify({ screen_name: screenName })
         });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         return data.message;
     },
@@ -133,6 +136,7 @@ export const psychometricApi = {
             credentials: "include",
             body: JSON.stringify(params)
         });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         return data.message;
     },
@@ -144,6 +148,7 @@ export const psychometricApi = {
             credentials: "include",
             body: JSON.stringify({ screen_name: screenName })
         });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         return data.message;
     },
@@ -155,6 +160,7 @@ export const psychometricApi = {
             credentials: "include",
             body: JSON.stringify({ name: screenName, email })
         });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
 
         if (typeof window !== "undefined" && email) {

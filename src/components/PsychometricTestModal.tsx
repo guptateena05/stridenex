@@ -175,10 +175,21 @@ export default function PsychometricTestModal({
             const tests = await psychometricApi.getTests();
             const testName = tests && tests.length > 0 ? tests[0].name : "Demo psy 1";
 
-            const sid = await psychometricApi.startNewTest(testName, studentEmail);
+            const response = await psychometricApi.startNewTest(testName, studentEmail);
+            
+            if (response?.status === "quota_exceeded") {
+                setErrorMessage(response.message || "You have exceeded your psychometric test limit. Please upgrade your plan.");
+                setLoading(false);
+                return;
+            }
+
+            const sid = response?.test_screen || response?.name || response?.screen_name || (typeof response === "string" ? response : null);
+            if (!sid) throw new Error("Invalid session ID returned");
             setScreenName(sid);
 
             const qData = await psychometricApi.loadQuestion(sid);
+            if (!qData) throw new Error("No question data returned");
+            
             setQuestion(qData);
             setQuestionNumber(1);
             if (qData.total_questions) {
@@ -611,6 +622,26 @@ export default function PsychometricTestModal({
                                         </div>
                                     )}
                                 </div>
+                            ) : errorMessage ? (
+                                <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 animate-fadeIn">
+                                    <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-full flex items-center justify-center text-2xl">
+                                        ⚠️
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900">Unable to Start Test</h3>
+                                    <p className="text-sm font-medium text-red-600 max-w-sm px-4">
+                                        {errorMessage}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setStep("intro");
+                                            setErrorMessage("");
+                                        }}
+                                        className="mt-6 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors active:scale-95"
+                                    >
+                                        Go Back
+                                    </button>
+                                </div>
                             ) : null}
                         </>
                     )}
@@ -631,7 +662,7 @@ export default function PsychometricTestModal({
                         >
                             <span>🚀</span> Explore Dashboard & Close
                         </button>
-                    ) : !loading ? (
+                    ) : !loading && question ? (
                         <>
                             <button
                                 type="button"

@@ -40,6 +40,7 @@ import {
   getStudentCareerPath,
   getRecommendedPaths,
   getAllCareerPaths,
+  getCareerPathQuotaStatus,
   enrollStudentPath,
   deleteStudentEnrollment,
   createStudentSkill,
@@ -111,6 +112,8 @@ function ConfettiEffect() {
 export default function PathTabContent() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [quotaStatus, setQuotaStatus] = useState<any>(null);
+  const [quotaLoading, setQuotaLoading] = useState(true);
   const [activePath, setActivePath] = useState<any>(null);
   const [recommendedPaths, setRecommendedPaths] = useState<any[]>([]);
   const [allCareerPaths, setAllCareerPaths] = useState<any[]>([]);
@@ -298,8 +301,8 @@ export default function PathTabContent() {
       if (!silent) setLoading(true);
       const studentEmail = localStorage.getItem("currentUser") || "ac1@gmail.com";
 
-      // Fetch active career path, student skills, student details, and completed paths in parallel
-      const [careerPathRes, studentSkillsRes, studentDetailsRes, completedPathsRes] = await Promise.all([
+      // Fetch active career path, student skills, student details, completed paths, and quota status in parallel
+      const [careerPathRes, studentSkillsRes, studentDetailsRes, completedPathsRes, quotaStatusRes] = await Promise.all([
         getStudentCareerPath(studentEmail).catch(err => {
           console.warn("getStudentCareerPath API failed, using fallback data:", err);
           return null;
@@ -315,8 +318,20 @@ export default function PathTabContent() {
         getCompletedPaths(studentEmail).catch(err => {
           console.warn("getCompletedPaths API failed:", err);
           return null;
+        }),
+        getCareerPathQuotaStatus(studentEmail).catch(err => {
+          console.warn("getCareerPathQuotaStatus API failed:", err);
+          // Fail-open
+          return { message: { can_add: true, is_gated: false } };
         })
       ]);
+
+      if (quotaStatusRes?.message) {
+        setQuotaStatus(quotaStatusRes.message);
+      } else {
+        setQuotaStatus({ can_add: true, is_gated: false });
+      }
+      setQuotaLoading(false);
 
       // Note: degree and branch are intentionally NOT auto-filled from student data.
       // The user must manually enter these in the AI Career Pathfinder form.
@@ -436,16 +451,49 @@ export default function PathTabContent() {
         setGenerationPhase("🤖 Initiating AI roadmap generation...");
       }
       const res = await enrollStudentPath(studentEmail, careerPathName, generationMode);
-      if (res) {
+      const status = res?.message?.status;
+
+      if (status === "success" || status === "already_enrolled") {
         hasSucceeded = true;
         if (generationMode === "AI") {
           setInWizardMode(false);
         }
+        if (status === "success") {
+          showToast("Successfully enrolled in career path!", "success");
+        } else {
+          showToast("Already enrolled in this career path.", "success");
+        }
         await fetchData();
+      } else if (status === "generating") {
+        hasSucceeded = true;
+        setIsGenerating(true);
+        setGenerationPhase("🤖 AI is generating your customized milestones...");
+        if (generationMode === "AI") {
+          setInWizardMode(false);
+        }
+        await fetchData();
+      } else if (status === "quota_exceeded") {
+        setQuotaStatus({
+          can_add: false,
+          is_gated: true,
+          used_count: res.message.quota_remaining === 0 ? quotaStatus?.total_limit : quotaStatus?.used_count,
+          total_limit: quotaStatus?.total_limit,
+          days_until_reset: quotaStatus?.days_until_reset,
+          message: res.message.message
+        });
+      } else {
+        if (res?.message?.status) {
+          showToast(res.message.message || "Failed to switch career path. Please try again.", "error");
+        }
       }
     } catch (err: any) {
-      console.error("Enrollment failed:", err);
-      showToast(parseBackendError(err) || "Failed to switch career path. Please try again.", "error");
+      if (err?.response?.status === 403) {
+        showToast("Session expired. Please log in again.", "error");
+        // Handle logout/redirect if possible
+      } else {
+        console.error("Enrollment failed:", err);
+        showToast("Failed to switch career path. Please try again.", "error");
+      }
     } finally {
       setEnrollingPath(null);
       if (!hasSucceeded || generationMode !== "AI") {
@@ -768,7 +816,9 @@ export default function PathTabContent() {
       setGenerationPhase("🤖 Enrolling student and generating personalized roadmap...");
 
       const res = await enrollStudentPath(studentEmail, pathTitle, "AI");
-      if (res) {
+      const status = res?.message?.status;
+
+      if (status === "success" || status === "already_enrolled") {
         hasSucceeded = true;
         setInWizardMode(false);
         setWizardStep(1);
@@ -776,11 +826,44 @@ export default function PathTabContent() {
         setSelectedPathDetails(null);
         setHierarchySkills(null);
         setSelectedSkills([]);
+        if (status === "success") {
+          showToast("Successfully enrolled in career path!", "success");
+        } else {
+          showToast("Already enrolled in this career path.", "success");
+        }
         await fetchData();
+      } else if (status === "generating") {
+        hasSucceeded = true;
+        setIsGenerating(true);
+        setGenerationPhase("🤖 AI is generating your customized milestones...");
+        setInWizardMode(false);
+        setWizardStep(1);
+        setSelectedPath(null);
+        setSelectedPathDetails(null);
+        setHierarchySkills(null);
+        setSelectedSkills([]);
+        await fetchData();
+      } else if (status === "quota_exceeded") {
+        setQuotaStatus({
+          can_add: false,
+          is_gated: true,
+          used_count: res.message.quota_remaining === 0 ? quotaStatus?.total_limit : quotaStatus?.used_count,
+          total_limit: quotaStatus?.total_limit,
+          days_until_reset: quotaStatus?.days_until_reset,
+          message: res.message.message
+        });
+      } else {
+        if (res?.message?.status) {
+          showToast(res.message.message || "Failed to switch career path. Please try again.", "error");
+        }
       }
     } catch (err: any) {
-      console.error("AI Generation failed:", err);
-      showToast(parseBackendError(err) || "Failed to generate AI roadmap. Please try again.", "error");
+      if (err?.response?.status === 403) {
+        showToast("Session expired. Please log in again.", "error");
+      } else {
+        console.error("AI Generation failed:", err);
+        showToast("Failed to generate AI roadmap. Please try again.", "error");
+      }
     } finally {
       if (!hasSucceeded) {
         setIsGenerating(false);
@@ -922,14 +1005,34 @@ export default function PathTabContent() {
               try {
                 const studentEmail = localStorage.getItem("currentUser") || "ac1@gmail.com";
                 const res = await enrollStudentPath(studentEmail, failedPathTitle, "AI");
-                if (res) {
+                const status = res?.message?.status;
+
+                if (status === "success" || status === "already_enrolled" || status === "generating") {
                   await fetchData();
+                } else if (status === "quota_exceeded") {
+                  setIsGenerating(false);
+                  setIsGenerationFailed(false);
+                  setQuotaStatus({
+                    can_add: false,
+                    is_gated: true,
+                    used_count: res.message.quota_remaining === 0 ? quotaStatus?.total_limit : quotaStatus?.used_count,
+                    total_limit: quotaStatus?.total_limit,
+                    days_until_reset: quotaStatus?.days_until_reset,
+                    message: res.message.message
+                  });
+                  setInWizardMode(false);
+                } else {
+                  if (res?.message?.status) {
+                    showToast(res.message.message || "Retry failed.", "error");
+                  }
+                  setIsGenerating(false);
+                  setIsGenerationFailed(true);
                 }
               } catch (err: any) {
                 console.error("Retry failed:", err);
                 setIsGenerating(false);
                 setIsGenerationFailed(true);
-                showToast(parseBackendError(err) || "Retry failed. Please try again later.", "error");
+                showToast("Retry failed. Please try again later.", "error");
               }
             }}
             className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition duration-200 shadow-sm"
@@ -1033,7 +1136,7 @@ export default function PathTabContent() {
   ];
 
   return (
-    <div>
+    <div className="relative">
       <AnimatePresence>
         {showGuideBanner && (
           <motion.div
@@ -1104,25 +1207,27 @@ export default function PathTabContent() {
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-[1360px] mx-auto px-4 mb-4 flex justify-end gap-2">
-        {completedPaths.length > 0 && (
-          <button
-            onClick={() => setShowCompletedPathsModal(true)}
-            className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-100 shadow-sm"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Completed Paths ({completedPaths.length})
-          </button>
-        )}
-        {!showGuideBanner && (
-          <button
-            onClick={() => setShowGuideBanner(true)}
-            className="flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors border border-blue-100 shadow-sm"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            How Skill Path Works
-          </button>
-        )}
+      <div className="w-full max-w-[1360px] mx-auto px-4 mb-4 flex justify-end items-center gap-2">
+        <div className="flex items-center gap-2">
+          {completedPaths.length > 0 && (
+            <button
+              onClick={() => setShowCompletedPathsModal(true)}
+              className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors border border-emerald-100 shadow-sm"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Completed Paths ({completedPaths.length})
+            </button>
+          )}
+          {!showGuideBanner && (
+            <button
+              onClick={() => setShowGuideBanner(true)}
+              className="flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors border border-blue-100 shadow-sm"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              How Skill Path Works
+            </button>
+          )}
+        </div>
       </div>
 
       {inWizardMode ? (
@@ -1355,15 +1460,40 @@ export default function PathTabContent() {
                 </div>
 
                 {/* CTA */}
-                <div className="flex justify-end pt-4 border-t border-slate-100">
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                  <div className="w-full sm:w-auto flex-1">
+                    {!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add && (
+                      <div className="flex items-center gap-3 px-3 py-2 bg-rose-50 border border-rose-100 rounded-xl">
+                        <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                        <div>
+                          <p className="text-xs font-bold text-rose-800">Activation limit reached</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <p className="text-[11px] text-rose-600 font-medium">Upgrade your plan to generate more career paths.</p>
+                            <button
+                              onClick={() => window.location.href = '/student/dashboard/plans'}
+                              className="text-[11px] font-bold text-rose-700 hover:text-rose-800 underline underline-offset-2"
+                            >
+                              Upgrade →
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={handleGetRecommendations}
-                    className="group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition-all duration-200 flex items-center gap-2.5 shadow-lg shadow-blue-500/20 active:scale-[0.98]"
+                    disabled={!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add}
+                    className={`group relative w-full sm:w-auto overflow-hidden px-6 py-3 text-sm font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2.5 active:scale-[0.98] ${!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add
+                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20'
+                      }`}
                   >
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                    <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                    {!(!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add) && (
+                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    )}
+                    <Sparkles className={`w-4 h-4 ${!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add ? 'text-slate-400' : 'text-amber-300 animate-pulse'}`} />
                     Find My Career Paths
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className={`w-4 h-4 transition-transform ${!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add ? '' : 'group-hover:translate-x-0.5'}`} />
                   </button>
                 </div>
               </motion.div>
@@ -1757,13 +1887,46 @@ export default function PathTabContent() {
                   >
                     Back to Suggestions
                   </button>
-                  <button
-                    onClick={() => handleStartPersonalizedRoadmap()}
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm"
-                  >
-                    <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
-                    Proceed & Activate Path
-                  </button>
+                  <div className="flex flex-col items-end gap-2">
+                    {!quotaLoading && quotaStatus?.is_gated && quotaStatus?.total_limit !== "Unlimited" && quotaStatus?.can_add && (
+                      <div className="text-[10px] text-slate-500 font-semibold mb-1">
+                        Path Activations: {quotaStatus?.used_count} / {quotaStatus?.total_limit} in current cycle | Resets in {quotaStatus?.days_until_reset} days
+                      </div>
+                    )}
+                    <button
+                      onClick={() => handleStartPersonalizedRoadmap()}
+                      disabled={!quotaStatus?.can_add && quotaStatus?.is_gated}
+                      className={`px-5 py-2.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm ${(!quotaStatus?.can_add && quotaStatus?.is_gated) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]'}`}
+                    >
+                      <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                      Proceed & Activate Path
+                    </button>
+                    {!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add && (
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-purple-100/50 p-4 mt-2 max-w-sm w-full shadow-sm">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                        <div className="flex items-start gap-3 relative z-10">
+                          <div className="mt-0.5 bg-white p-1.5 rounded-lg shadow-sm border border-purple-100 shrink-0">
+                            <Sparkles className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-xs font-bold text-slate-800">
+                              Quota Reached
+                            </h4>
+                            <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed font-medium">
+                              {quotaStatus?.message || `You've used all ${quotaStatus?.total_limit} path activations for the current cycle.`}
+                            </p>
+                            <button
+                              className="mt-2.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-bold rounded-lg shadow-sm transition-all hover:shadow flex items-center gap-1.5 group w-fit"
+                              onClick={(e) => { e.stopPropagation(); window.location.href = '/student/dashboard/plans'; }}
+                            >
+                              Upgrade Plan
+                              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -1772,6 +1935,60 @@ export default function PathTabContent() {
 
           {/* RIGHT SIDEBAR — Onboarding Step Guide & Future Journey */}
           <div className="w-full lg:w-80 shrink-0 sticky top-6 self-start space-y-6">
+
+            {/* Quota Status Card - Always visible in the right sidebar */}
+            {!quotaLoading && quotaStatus?.is_gated && quotaStatus?.total_limit !== "Unlimited" && (
+              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">Path Activations</h3>
+                  <div className="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md text-[10px] font-bold border border-blue-100">
+                    Resets in {quotaStatus?.days_until_reset} {quotaStatus?.days_until_reset === 1 ? 'day' : 'days'}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-end">
+                    <span className="text-2xl font-black text-slate-800">{quotaStatus?.used_count} <span className="text-sm font-bold text-slate-400">/ {quotaStatus?.total_limit}</span></span>
+                    <span className="text-xs font-bold text-slate-500 mb-1.5">Used this cycle</span>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${!quotaStatus?.can_add ? 'bg-rose-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}`}
+                      style={{ width: `${Math.min(100, (quotaStatus?.used_count / quotaStatus?.total_limit) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {!quotaStatus?.can_add ? (
+                  <div className="pt-3 border-t border-slate-100">
+                    <div className="flex items-start gap-2 mb-3">
+                      <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                        {quotaStatus?.message || "You've reached your path activation limit for the current cycle."}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); window.location.href = '/student/dashboard/plans'; }}
+                      className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-bold rounded-xl shadow-sm transition-all hover:shadow flex items-center justify-center gap-1.5 group"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-purple-200" />
+                      Upgrade Plan
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pt-3 border-t border-slate-100">
+                    <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      You have <strong className="text-slate-700">{Math.max(0, quotaStatus?.total_limit - quotaStatus?.used_count)}</strong> path activation{Math.max(0, quotaStatus?.total_limit - quotaStatus?.used_count) !== 1 ? 's' : ''} remaining.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Onboarding Guide Card */}
             <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5 space-y-4">
               <div>
@@ -2114,11 +2331,10 @@ export default function PathTabContent() {
                 <button
                   onClick={handleGetCertificate}
                   disabled={isCertificateLoading || !isPathCompleted}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                    isPathCompleted 
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-md hover:from-amber-600 hover:to-orange-700' 
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${isPathCompleted
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-md hover:from-amber-600 hover:to-orange-700'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    }`}
                 >
                   {isCertificateLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -2403,6 +2619,37 @@ export default function PathTabContent() {
                   <h3 className="text-sm font-bold text-slate-800">Other Career Paths</h3>
                 </div>
 
+                {!quotaLoading && quotaStatus?.is_gated && quotaStatus?.total_limit !== "Unlimited" && quotaStatus?.can_add && (
+                  <div className="text-[10px] text-slate-500 font-semibold mb-3">
+                    Path Activations: {quotaStatus?.used_count} / {quotaStatus?.total_limit} in current cycle | Resets in {quotaStatus?.days_until_reset} days
+                  </div>
+                )}
+                {!quotaLoading && quotaStatus?.is_gated && !quotaStatus?.can_add && (
+                  <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-purple-100/50 p-4 mb-4 w-full shadow-sm">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    <div className="flex items-start gap-3 relative z-10">
+                      <div className="mt-0.5 bg-white p-1.5 rounded-lg shadow-sm border border-purple-100 shrink-0">
+                        <Sparkles className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-xs font-bold text-slate-800">
+                          Quota Reached
+                        </h4>
+                        <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed font-medium">
+                          {quotaStatus?.message || `You've used all ${quotaStatus?.total_limit} path activations for the current cycle.`}
+                        </p>
+                        <button
+                          className="mt-2.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[11px] font-bold rounded-lg shadow-sm transition-all hover:shadow flex items-center gap-1.5 group w-fit"
+                          onClick={(e) => { e.stopPropagation(); window.location.href = '/student/dashboard/plans'; }}
+                        >
+                          Upgrade Plan
+                          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   {alternatePaths.map((path: any, idx: number) => (
                     <div key={`${path.title}-${idx}`} className="group cursor-pointer">
@@ -2441,8 +2688,8 @@ export default function PathTabContent() {
                                 e.stopPropagation();
                                 handleEnrollPath(path.title, "Standard");
                               }}
-                              disabled={enrollingPath !== null}
-                              className="px-3 py-1.5 text-xs font-bold rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/60 transition-all duration-200 flex items-center gap-1.5 disabled:opacity-50"
+                              disabled={enrollingPath !== null || (!quotaStatus?.can_add && quotaStatus?.is_gated)}
+                              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all duration-200 flex items-center gap-1.5 ${(!quotaStatus?.can_add && quotaStatus?.is_gated) ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/60 disabled:opacity-50'}`}
                             >
                               {enrollingPath === path.title ? (
                                 <Loader2 className="w-3 h-3 animate-spin text-slate-500" />
@@ -2454,8 +2701,8 @@ export default function PathTabContent() {
                                 e.stopPropagation();
                                 handleEnrollPath(path.title, "AI");
                               }}
-                              disabled={enrollingPath !== null}
-                              className="px-3 py-1.5 text-xs font-bold rounded-md bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow active:scale-95 transition-all duration-200 flex items-center gap-1.5 disabled:opacity-50"
+                              disabled={enrollingPath !== null || (!quotaStatus?.can_add && quotaStatus?.is_gated)}
+                              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all duration-200 flex items-center gap-1.5 ${(!quotaStatus?.can_add && quotaStatus?.is_gated) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow active:scale-95 disabled:opacity-50'}`}
                             >
                               {enrollingPath === path.title ? (
                                 <Loader2 className="w-3 h-3 animate-spin text-white" />
@@ -3046,7 +3293,7 @@ export default function PathTabContent() {
                                     const params = new URLSearchParams(payload as any).toString();
                                     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ? (process.env.NEXT_PUBLIC_API_BASE_URL.endsWith('/') ? process.env.NEXT_PUBLIC_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL + '/') : '/';
                                     const url = `${apiBase}method/stridenex_app.api_stridenex_app.app.get_certificate?${params}`;
-                                    
+
                                     const response = await fetch(url);
                                     if (response.ok) {
                                       const blob = await response.blob();
@@ -3068,7 +3315,7 @@ export default function PathTabContent() {
                               </button>
                             )}
                           </div>
-                          
+
                           <div>
                             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Skills Acquired</h4>
                             {cp.skills_acquired && cp.skills_acquired.length > 0 ? (
