@@ -29,7 +29,7 @@ interface PartnerData {
 export default function PartnerPage() {
   const { currentUser, logout, isAuthenticated, isInitialized, role } = useAuth();
   const router = useRouter();
-  
+
   const [partnerData, setPartnerData] = useState<PartnerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,15 +57,15 @@ export default function PartnerPage() {
     try {
       setLoading(true);
       setError("");
-      
+
       const res = await axios.get(`${BASE_URL}method/stridenex_app.stridenex_app.doctype.stridenex_partner.stridenex_partner.get_partner`, {
         params: { email: currentUser }
       });
-      
+
       if (res.data && res.data.message?.status === "success" && res.data.message?.data?.partner) {
         const pData = res.data.message.data.partner;
         const refCode = res.data.message.data.user?.referal_code;
-        
+
         setPartnerData({ ...pData, referal_code: refCode });
       } else {
         throw new Error("Invalid response format");
@@ -115,9 +115,9 @@ export default function PartnerPage() {
         company_size: editData.company_size ? Number(editData.company_size) : undefined,
         state: editData.state
       };
-      
+
       const res = await axios.put(`${BASE_URL}method/stridenex_app.stridenex_app.doctype.stridenex_partner.stridenex_partner.edit_stridenex_partner`, payload);
-      
+
       if (res.data && (res.data.status === 200 || res.data.data?.success)) {
         setPartnerData({ ...partnerData, ...editData });
         setIsEditing(false);
@@ -176,22 +176,13 @@ export default function PartnerPage() {
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-3">
-              Welcome back, {partnerData?.first_name || 'Partner'}
-            </h1>
-            <p className="text-slate-500 text-lg">
-              Manage your partner profile and organizational details.
-            </p>
-          </div>
-          
-          {/* Referral Card Display */}
-          {partnerData?.referal_code && (
-            <div className="w-full md:w-auto min-w-[320px] max-w-[450px]">
-              <ReferralSectionField referralCode={partnerData.referal_code} role="partner" showPerformance={false} />
-            </div>
-          )}
+        <div className="mb-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 tracking-tight mb-4 pb-1">
+            Welcome back, {partnerData?.first_name || 'Partner'}!
+          </h1>
+          <p className="text-slate-500 text-lg">
+            Manage your partner profile, view organizational details, and access your exclusive partner resources.
+          </p>
         </div>
 
         {error ? (
@@ -204,17 +195,17 @@ export default function PartnerPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
               {/* Cover / Top Section */}
               <div className="h-24 bg-gradient-to-r from-blue-600 to-sky-400 relative"></div>
-              
+
               <div className="px-6 sm:px-10 pb-10 relative">
                 <div className="flex justify-between items-start -mt-10 sm:-mt-14 mb-6">
                   {/* Avatar Profile */}
                   <div className="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-full border-4 border-white shadow-md flex items-center justify-center text-3xl font-bold text-blue-600 uppercase shrink-0">
                     {partnerData.first_name?.[0]}{partnerData.last_name?.[0]}
                   </div>
-                  
+
                   <div className="mt-14 sm:mt-16">
                     {!isEditing ? (
-                      <button 
+                      <button
                         onClick={() => { setIsEditing(true); setEditData(partnerData); setEditSuccess(""); }}
                         className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors border border-blue-200"
                       >
@@ -222,13 +213,13 @@ export default function PartnerPage() {
                       </button>
                     ) : (
                       <div className="flex gap-2">
-                        <button 
+                        <button
                           onClick={() => setIsEditing(false)}
                           className="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
                         >
                           Cancel
                         </button>
-                        <button 
+                        <button
                           onClick={handleEditSubmit}
                           disabled={editLoading}
                           className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
@@ -258,7 +249,7 @@ export default function PartnerPage() {
                     <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2">
                       Personal Information
                     </h3>
-                    
+
                     <div className="space-y-5">
                       <div className="flex gap-4">
                         <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0 mt-1">
@@ -268,17 +259,17 @@ export default function PartnerPage() {
                           <p className="text-[13px] font-medium text-slate-500 uppercase tracking-wide mb-1">Full Name</p>
                           {isEditing ? (
                             <div className="flex gap-2">
-                              <input 
-                                type="text" 
-                                value={editData?.first_name || ''} 
-                                onChange={(e) => setEditData(prev => prev ? {...prev, first_name: e.target.value} : null)}
+                              <input
+                                type="text"
+                                value={editData?.first_name || ''}
+                                onChange={(e) => setEditData(prev => prev ? { ...prev, first_name: e.target.value } : null)}
                                 className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="First Name"
                               />
-                              <input 
-                                type="text" 
-                                value={editData?.last_name || ''} 
-                                onChange={(e) => setEditData(prev => prev ? {...prev, last_name: e.target.value} : null)}
+                              <input
+                                type="text"
+                                value={editData?.last_name || ''}
+                                onChange={(e) => setEditData(prev => prev ? { ...prev, last_name: e.target.value } : null)}
                                 className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Last Name"
                               />
@@ -296,9 +287,9 @@ export default function PartnerPage() {
                         <div className="flex-1">
                           <p className="text-[13px] font-medium text-slate-500 uppercase tracking-wide mb-1">Email Address</p>
                           {isEditing ? (
-                            <input 
-                              type="email" 
-                              value={editData?.email || ''} 
+                            <input
+                              type="email"
+                              value={editData?.email || ''}
                               readOnly
                               className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none bg-slate-50 text-slate-500 cursor-not-allowed"
                             />
@@ -315,9 +306,9 @@ export default function PartnerPage() {
                         <div className="flex-1">
                           <p className="text-[13px] font-medium text-slate-500 uppercase tracking-wide mb-1">Phone Number</p>
                           {isEditing ? (
-                            <input 
-                              type="tel" 
-                              value={editData?.phone_number || ''} 
+                            <input
+                              type="tel"
+                              value={editData?.phone_number || ''}
                               readOnly
                               className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none bg-slate-50 text-slate-500 cursor-not-allowed"
                             />
@@ -334,7 +325,7 @@ export default function PartnerPage() {
                     <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2">
                       Professional Information
                     </h3>
-                    
+
                     <div className="space-y-5">
                       <div className="flex gap-4">
                         <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center shrink-0 mt-1">
@@ -343,10 +334,10 @@ export default function PartnerPage() {
                         <div className="flex-1">
                           <p className="text-[13px] font-medium text-slate-500 uppercase tracking-wide mb-1">Organization</p>
                           {isEditing ? (
-                            <input 
-                              type="text" 
-                              value={editData?.organisation || ''} 
-                              onChange={(e) => setEditData(prev => prev ? {...prev, organisation: e.target.value} : null)}
+                            <input
+                              type="text"
+                              value={editData?.organisation || ''}
+                              onChange={(e) => setEditData(prev => prev ? { ...prev, organisation: e.target.value } : null)}
                               className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           ) : (
@@ -362,16 +353,16 @@ export default function PartnerPage() {
                         <div className="flex-1">
                           <p className="text-[13px] font-medium text-slate-500 uppercase tracking-wide mb-1">Job Title & Type</p>
                           {isEditing ? (
-                            <input 
-                              type="text" 
-                              value={editData?.job_title || ''} 
-                              onChange={(e) => setEditData(prev => prev ? {...prev, job_title: e.target.value} : null)}
+                            <input
+                              type="text"
+                              value={editData?.job_title || ''}
+                              onChange={(e) => setEditData(prev => prev ? { ...prev, job_title: e.target.value } : null)}
                               className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Job Title"
                             />
                           ) : (
                             <p className="text-slate-900 font-medium">
-                              {partnerData.job_title} 
+                              {partnerData.job_title}
                               {partnerData.partner_type && <span className="text-slate-400 font-normal ml-1">({partnerData.partner_type})</span>}
                             </p>
                           )}
@@ -385,9 +376,9 @@ export default function PartnerPage() {
                         <div className="flex-1">
                           <p className="text-[13px] font-medium text-slate-500 uppercase tracking-wide mb-1">Company Size</p>
                           {isEditing ? (
-                            <select 
-                              value={editData?.company_size || ''} 
-                              onChange={(e) => setEditData(prev => prev ? {...prev, company_size: e.target.value} : null)}
+                            <select
+                              value={editData?.company_size || ''}
+                              onChange={(e) => setEditData(prev => prev ? { ...prev, company_size: e.target.value } : null)}
                               className="w-full px-3 py-1.5 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                               <option value="">Select Size</option>
@@ -415,7 +406,7 @@ export default function PartnerPage() {
                                 id="state"
                                 placeholder="State"
                                 value={editData?.state || ''}
-                                onChange={(val) => setEditData(prev => prev ? {...prev, state: val} : null)}
+                                onChange={(val) => setEditData(prev => prev ? { ...prev, state: val } : null)}
                                 endpoint={`${BASE_URL}method/stridenex_app.api_stridenex_app.college.master.get_master_data`}
                                 params={{ doctype: "State" }}
                                 searchable={true}
@@ -436,7 +427,25 @@ export default function PartnerPage() {
 
             {/* Referral Stats Section */}
             {partnerData?.referal_code && (
-              <ReferralPerformanceWidget referralCode={partnerData.referal_code} role="partner" />
+              <div className="pt-6">
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center p-3 bg-blue-100 rounded-full mb-4">
+                    <Target className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h2 className="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">Refer & Earn Rewards!</h2>
+                  <p className="text-slate-500 text-lg max-w-xl mx-auto">
+                    Share your unique partner code to empower others and build a brighter future together. Earn exclusive benefits for every successful referral.
+                  </p>
+                </div>
+
+                <div className="flex justify-center mb-10">
+                  <div className="w-full max-w-2xl transform transition-transform hover:scale-[1.02] duration-300">
+                    <ReferralSectionField referralCode={partnerData.referal_code} role="partner" showPerformance={false} />
+                  </div>
+                </div>
+
+                <ReferralPerformanceWidget referralCode={partnerData.referal_code} role="partner" />
+              </div>
             )}
           </div>
         ) : null}
