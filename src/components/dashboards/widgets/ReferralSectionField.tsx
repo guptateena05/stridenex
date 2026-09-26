@@ -35,39 +35,33 @@ export default function ReferralSectionField({ role, referralCode, showPerforman
     <div className="flex flex-col w-full gap-4 mt-2">
       {/* Referral Card Display */}
       {refCardUrl && (
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm p-5 flex flex-col items-center justify-center">
-          <div className="relative w-full max-w-lg">
-            <img src={refCardUrl} alt="Referral Card" className="w-full h-auto rounded-xl border border-slate-100 shadow-sm" />
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(referralCode);
-                  setCopiedCard(true);
-                  setTimeout(() => setCopiedCard(false), 2000);
-                } catch (err) {
-                  console.error("Failed to copy code", err);
-                }
-              }}
-              className={`absolute top-3 right-3 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-sm border ${
-                copiedCard 
-                  ? "bg-emerald-500 text-white border-emerald-600" 
-                  : "bg-white/90 backdrop-blur-sm text-slate-700 hover:bg-slate-50 hover:text-emerald-600 border-slate-200"
-              }`}
-              title="Copy Code"
-            >
-              {copiedCard ? (
-                <>
-                  <CheckCircle2 size={14} />
-                  <span>Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy size={14} />
-                  <span>Copy Code</span>
-                </>
-              )}
-            </button>
+        <div className="relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-emerald-50/80 to-teal-50/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-6 md:p-8 flex flex-col items-center justify-center group hover:shadow-emerald-500/15 transition-all duration-500">
+          <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] opacity-[0.05]"></div>
+          <div className="relative w-full max-w-[36rem] transform group-hover:-translate-y-2 transition-transform duration-500 flex flex-col sm:flex-row items-start justify-center gap-6">
+            <img src={refCardUrl} alt="Referral Card" className="w-full sm:w-auto flex-1 h-auto rounded-xl border border-white shadow-lg group-hover:shadow-2xl transition-shadow duration-500" />
+            
+            <div className="relative z-10 shrink-0">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(referralCode);
+                    setCopiedCard(true);
+                    setTimeout(() => setCopiedCard(false), 2000);
+                  } catch (err) {
+                    console.error("Failed to copy code", err);
+                  }
+                }}
+                className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all shadow-md border ${
+                  copiedCard 
+                    ? "bg-emerald-500 text-white border-emerald-600 scale-105" 
+                    : "bg-white backdrop-blur-md text-emerald-700 hover:bg-emerald-50 hover:scale-105 border-emerald-100"
+                }`}
+                title="Copy Code"
+              >
+                {copiedCard ? <CheckCircle2 size={22} strokeWidth={2.5} /> : <Copy size={22} strokeWidth={2.5} />}
+              </button>
+            </div>
           </div>
         </div>
       )}

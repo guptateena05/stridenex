@@ -148,9 +148,16 @@ export default function PartnerPage() {
 
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50/60 via-slate-50 to-blue-50/60 font-sans pb-20 relative">
+      {/* Decorative background pattern */}
+      <div className="fixed inset-0 z-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.1] pointer-events-none"></div>
+      
+      {/* Decorative blobs */}
+      <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+      <header className="bg-white/70 backdrop-blur-2xl border-b border-white/50 sticky top-0 z-20 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
@@ -177,7 +184,7 @@ export default function PartnerPage() {
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 tracking-tight mb-4 pb-1">
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-4">
             Welcome back, {partnerData?.first_name || 'Partner'}!
           </h1>
           <p className="text-slate-500 text-lg">
@@ -186,24 +193,27 @@ export default function PartnerPage() {
         </div>
 
         {error ? (
-          <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 mb-8 animate-in zoom-in-95">
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 mb-8 animate-in zoom-in-95 relative z-10">
             {error}
           </div>
         ) : partnerData ? (
-          <div className="space-y-8">
+          <div className="space-y-8 relative z-10">
             {/* Profile Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+            <div className="bg-white/70 backdrop-blur-2xl rounded-3xl shadow-xl shadow-indigo-900/5 border border-white/80 overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
               {/* Cover / Top Section */}
-              <div className="h-24 bg-gradient-to-r from-blue-600 to-sky-400 relative"></div>
+              <div className="h-32 bg-gradient-to-r from-slate-800 via-slate-900 to-indigo-950 relative">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_50%)]"></div>
+                <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
+              </div>
 
               <div className="px-6 sm:px-10 pb-10 relative">
-                <div className="flex justify-between items-start -mt-10 sm:-mt-14 mb-6">
+                <div className="flex justify-between items-start -mt-12 sm:-mt-16 mb-8">
                   {/* Avatar Profile */}
-                  <div className="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-full border-4 border-white shadow-md flex items-center justify-center text-3xl font-bold text-blue-600 uppercase shrink-0">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full border-[5px] border-white shadow-lg flex items-center justify-center text-4xl font-bold text-slate-800 uppercase shrink-0">
                     {partnerData.first_name?.[0]}{partnerData.last_name?.[0]}
                   </div>
 
-                  <div className="mt-14 sm:mt-16">
+                  <div className="mt-16 sm:mt-20">
                     {!isEditing ? (
                       <button
                         onClick={() => { setIsEditing(true); setEditData(partnerData); setEditSuccess(""); }}
@@ -246,7 +256,7 @@ export default function PartnerPage() {
                 <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
                   {/* Personal Information */}
                   <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2">
+                    <h3 className="text-lg font-bold text-slate-900 border-b border-slate-200/60 pb-3">
                       Personal Information
                     </h3>
 
@@ -322,7 +332,7 @@ export default function PartnerPage() {
 
                   {/* Professional Information */}
                   <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2">
+                    <h3 className="text-lg font-bold text-slate-900 border-b border-slate-200/60 pb-3">
                       Professional Information
                     </h3>
 

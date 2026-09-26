@@ -251,8 +251,15 @@ export default function PartnerForm() {
   };
 
   return (
-    <section className="py-24 bg-white border-t border-gray-100" id="partner-form">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-24 relative overflow-hidden bg-[#0A0F1C]" id="partner-form">
+      {/* Immersive Background for Form Section */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-indigo-600/10 rounded-full blur-[100px] mix-blend-screen" />
+        <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-blue-600/10 rounded-full blur-[100px] mix-blend-screen" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           
           {/* Left Column: Text & Quote */}
@@ -262,27 +269,35 @@ export default function PartnerForm() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">
-              Let&apos;s Drive Transformation Together
+            <div className="inline-flex items-center gap-2 py-1.5 px-3 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+              <span className="text-blue-300 text-xs font-semibold tracking-wider uppercase">Become a Partner</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+              Let&apos;s Drive <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+                Transformation
+              </span> Together
             </h2>
-            <p className="text-lg text-gray-600 mb-10 leading-relaxed font-light">
+            <p className="text-lg text-gray-400 mb-10 leading-relaxed font-light">
               Join the StrideNex Partner Network to leverage verified talent pipelines, outcome-driven pathways, and dedicated support that accelerates your growth.
             </p>
             
-            <div className="relative">
+            <div className="relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md">
               {/* Quote icon */}
-              <span className="absolute -top-6 -left-4 text-6xl text-blue-100 font-serif leading-none opacity-50 select-none">"</span>
-              <p className="relative z-10 text-xl md:text-2xl text-gray-800 italic font-medium leading-relaxed mb-8">
+              <span className="absolute -top-4 -left-2 text-6xl text-blue-500/30 font-serif leading-none select-none">"</span>
+              <p className="relative z-10 text-lg md:text-xl text-gray-300 italic font-medium leading-relaxed mb-8">
                 I invite you to join StrideNex's Partner Network. You'll gain access to world-class career pathways, AI-powered matching, and dedicated partnership support. More importantly, you'll help solve the most critical challenge: building skilled, future-ready workforces.
               </p>
               
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center border-4 border-white shadow-lg shrink-0">
-                  <span className="text-xl font-bold text-white tracking-wider">KS</span>
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-2 border-white/20 shadow-lg shrink-0">
+                  <span className="text-lg font-bold text-white tracking-wider">KS</span>
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900 text-lg">Kishor P. Shendge</h4>
-                  <p className="text-sm text-gray-500">Founder, StrideNex</p>
+                  <h4 className="font-bold text-white text-lg">Kishor P. Shendge</h4>
+                  <p className="text-sm text-blue-300">Founder, StrideNex</p>
                 </div>
               </div>
             </div>
@@ -294,17 +309,17 @@ export default function PartnerForm() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white p-8 md:p-10 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100"
+            className="bg-white/5 backdrop-blur-2xl p-8 md:p-10 rounded-2xl shadow-2xl shadow-indigo-900/20 border border-white/10"
           >
             <form onSubmit={handleSubmit} className="space-y-6">
               
               {submitSuccess && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-lg text-sm border border-green-200">
+                <div className="bg-green-500/20 text-green-300 p-4 rounded-lg text-sm border border-green-500/30">
                   {submitSuccess}
                 </div>
               )}
               {submitError && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-lg text-sm border border-red-200">
+                <div className="bg-red-500/20 text-red-300 p-4 rounded-lg text-sm border border-red-500/30">
                   {submitError}
                 </div>
               )}
@@ -320,7 +335,7 @@ export default function PartnerForm() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-gray-800"
+                    className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/5 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none transition-colors text-white placeholder-gray-400"
                   />
                 </div>
                 <div>
@@ -333,7 +348,7 @@ export default function PartnerForm() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-gray-800"
+                    className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/5 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none transition-colors text-white placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -351,16 +366,16 @@ export default function PartnerForm() {
                         disabled={isEmailVerified || showEmailOtp}
                         value={formData.email}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-colors text-gray-800 ${isEmailVerified ? 'border-green-300 bg-green-50' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
+                        className={`w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-colors text-white placeholder-gray-400 ${isEmailVerified ? 'border-green-400/50 bg-green-400/10' : 'border-white/20 bg-white/5 focus:border-blue-400 focus:ring-blue-400/30'}`}
                       />
-                      {isEmailVerified && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />}
+                      {isEmailVerified && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-400" />}
                     </div>
                     {!isEmailVerified && (
                       <button
                         type="button"
                         onClick={handleSendEmailOTP}
                         disabled={!formData.email || otpLoading || emailTimer > 0}
-                        className="px-4 py-3 bg-white border border-blue-200 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 whitespace-nowrap"
+                        className="px-4 py-3 bg-white/10 border border-blue-400/30 text-blue-300 font-medium rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50 whitespace-nowrap"
                       >
                         {emailTimer > 0 ? `Resend in ${emailTimer}s` : "Verify"}
                       </button>
@@ -374,14 +389,14 @@ export default function PartnerForm() {
                         placeholder="Enter Email OTP"
                         value={emailOtp}
                         onChange={(e) => setEmailOtp(e.target.value)}
-                        className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm"
+                        className="flex-1 px-4 py-2.5 rounded-lg border border-white/20 bg-white/5 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none text-white text-sm placeholder-gray-400"
                         maxLength={6}
                       />
                       <button
                         type="button"
                         onClick={handleVerifyEmailOTP}
                         disabled={!emailOtp || otpLoading}
-                        className="px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+                        className="px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
                       >
                         Submit
                       </button>
@@ -402,16 +417,16 @@ export default function PartnerForm() {
                         disabled={isMobileVerified || showMobileOtp}
                         value={formData.phone}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-colors text-gray-800 ${isMobileVerified ? 'border-green-300 bg-green-50' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'}`}
+                        className={`w-full px-4 py-3 rounded-lg border focus:ring-2 outline-none transition-colors text-white placeholder-gray-400 ${isMobileVerified ? 'border-green-400/50 bg-green-400/10' : 'border-white/20 bg-white/5 focus:border-blue-400 focus:ring-blue-400/30'}`}
                       />
-                      {isMobileVerified && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />}
+                      {isMobileVerified && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-400" />}
                     </div>
                     {!isMobileVerified && (
                       <button
                         type="button"
                         onClick={handleSendMobileOTP}
                         disabled={!formData.phone || formData.phone.length !== 10 || otpLoading || mobileTimer > 0}
-                        className="px-4 py-3 bg-white border border-blue-200 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 whitespace-nowrap"
+                        className="px-4 py-3 bg-white/10 border border-blue-400/30 text-blue-300 font-medium rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50 whitespace-nowrap"
                       >
                         {mobileTimer > 0 ? `Resend in ${mobileTimer}s` : "Verify"}
                       </button>
@@ -425,14 +440,14 @@ export default function PartnerForm() {
                         placeholder="Enter Phone OTP"
                         value={mobileOtp}
                         onChange={(e) => setMobileOtp(e.target.value)}
-                        className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm"
+                        className="flex-1 px-4 py-2.5 rounded-lg border border-white/20 bg-white/5 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none text-white text-sm placeholder-gray-400"
                         maxLength={6}
                       />
                       <button
                         type="button"
                         onClick={handleVerifyMobileOTP}
                         disabled={!mobileOtp || otpLoading}
-                        className="px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+                        className="px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
                       >
                         Submit
                       </button>
@@ -451,7 +466,7 @@ export default function PartnerForm() {
                     required
                     value={formData.organization}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-gray-800"
+                    className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/5 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none transition-colors text-white placeholder-gray-400"
                   />
                 </div>
                 <div>
@@ -464,7 +479,7 @@ export default function PartnerForm() {
                     required
                     value={formData.jobTitle}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-gray-800"
+                    className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/5 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none transition-colors text-white placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -545,25 +560,25 @@ export default function PartnerForm() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-gray-800 pr-12"
+                  className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/5 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 outline-none transition-colors text-white placeholder-gray-400 pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
 
-              <div className="text-xs text-gray-500 mt-2">
-                By submitting your info in the form above, you agree to our <a href="/terms-of-use" className="text-blue-600 hover:underline">Terms of Use</a> and <a href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Notice</a>. We may use this info to contact you and/or use data from third parties to personalize your experience.
+              <div className="text-xs text-gray-400 mt-2">
+                By submitting your info in the form above, you agree to our <a href="/terms-of-use" className="text-blue-400 hover:underline">Terms of Use</a> and <a href="/privacy-policy" className="text-blue-400 hover:underline">Privacy Notice</a>. We may use this info to contact you and/or use data from third parties to personalize your experience.
               </div>
 
               <button
                 type="submit"
                 disabled={loading || !isEmailVerified || !isMobileVerified}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-md shadow-blue-600/20 disabled:opacity-70 flex justify-center items-center gap-2"
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-900/30 disabled:opacity-70 flex justify-center items-center gap-2"
               >
                 {loading ? (
                   <>

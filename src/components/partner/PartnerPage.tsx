@@ -9,7 +9,7 @@ import PartnerCTA from "./PartnerCTA";
 
 export default function PartnerPage() {
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-slate-50">
       <PartnerHero />
       <StrategicShift />
       <PartnerCategories />
