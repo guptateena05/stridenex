@@ -37,7 +37,7 @@ export default function ContactUsPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (userCaptcha !== captchaText) {
       setCaptchaError(true);
@@ -48,9 +48,28 @@ export default function ContactUsPage() {
     setCaptchaError(false);
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_CONTACT_API_BASE_URL || "https://uat-dev.stridenex.ai/api/";
+      const response = await fetch(`${baseUrl}method/quantbit_payments_platform.api.contact_us`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          full_name: formData.fullName,
+          message: formData.message,
+          email: formData.emailId,
+          mobile_no: formData.mobileNo,
+          organization: formData.organisation,
+          designation: formData.designation
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+      
       setSubmitSuccess("Thank you for reaching out! We'll get back to you shortly.");
       setFormData({
         fullName: "",
@@ -63,7 +82,12 @@ export default function ContactUsPage() {
       setUserCaptcha("");
       setCaptchaText(generateCaptchaString());
       setTimeout(() => setSubmitSuccess(""), 5000);
-    }, 1500);
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message || "Something went wrong. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
