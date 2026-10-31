@@ -18,6 +18,8 @@ import {
   Building2,
   Briefcase,
   Users,
+  Newspaper,
+  Handshake,
   MessageCircle,
   X
 } from "lucide-react";
@@ -43,7 +45,7 @@ const footerLinks = {
     { label: "Skill Analytics", href: "/institutes/analytics" },
     { label: "Placement Enhancement", href: "/institutes/placement" },
     { label: "Faculty Development", href: "/institutes/faculty" },
-    { label: "Partner With Us", href: "/institutes/partner" },
+    { label: "Partner With Us", href: "/partner-with-us" },
   ],
   forIndustry: [
     { label: "Talent Pipeline", href: "/industry/talent" },
@@ -58,6 +60,11 @@ const footerLinks = {
     { label: "Mentors", href: "/about/mentors" },
     { label: "Careers", href: "/careers" },
     { label: "Contact", href: "/contact" },
+  ],
+  blogsAndEvents: [
+    { label: "Blogs", href: "/blogs" },
+    { label: "Events", href: "/events" },
+    { label: "Our Videos", href: "/our-videos" },
   ],
   legal: [
     { label: "Privacy Policy", href: "/privacy" },
@@ -137,7 +144,7 @@ export default function Footer({ appName = "StrideNex" }: FooterProps) {
 
       <div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 items-start gap-12 mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-start gap-12 mb-12">
           {/* Brand Column */}
           <div className="lg:col-span-3">
             <motion.div
@@ -160,49 +167,9 @@ export default function Footer({ appName = "StrideNex" }: FooterProps) {
                 </div>
               </div>
 
-              <p className="text-slate-300 text-sm leading-relaxed mb-6">
+              <p className="text-slate-300 text-sm leading-relaxed">
                 StrideNex is a collaborative career development platform connecting education, innovation, and industry to enable structured growth pathways for the next generation workforce.
               </p>
-
-              {/* Contact Info */}
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <Mail className="w-4 h-4 text-white" />
-                  <a href={`mailto:${contactInfo.email}`} className="text-slate-300 hover:text-white transition-colors">
-                    {contactInfo.email}
-                  </a>
-                </div>
-                {/* <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <Phone className="w-4 h-4 text-accent" />
-                  <a href={`tel:${contactInfo.phone}`} className="text-slate-300 hover:text-white transition-colors">
-                    {contactInfo.phone}
-                  </a>
-                </div> */}
-                <div className="flex items-center gap-2 text-sm text-slate-300">
-                  <MapPin className="w-4 h-4 text-emerald-500" />
-                  <span className="text-slate-300">{contactInfo.address}</span>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                {socialLinks.map((social, index) => (
-                  <motion.a
-                    key={index}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    className="group w-10 h-10 rounded-full bg-slate-800/50 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-slate-700 hover:border-transparent text-slate-300"
-                    aria-label={social.label}
-                  >
-                    {/* {social.customIcon ? (
-                      <social.customIcon className={`w-5 h-5 transition-colors ${social.hoverColor}`} />
-                    ) : ( */}
-                    <social.icon className={`w-5 h-5 transition-colors ${social.hoverColor}`} />
-                    {/* )} */}
-                  </motion.a>
-                ))}
-              </div>
             </motion.div>
           </div>
 
@@ -372,6 +339,110 @@ export default function Footer({ appName = "StrideNex" }: FooterProps) {
               </p>
             </motion.div>
           </div> */}
+        </div>
+
+        {/* Three-Part Secondary Row: 1) Contact & Social, 2) Blogs & Events, 3) Partner With Us */}
+        <div className="grid grid-cols-1 md:grid-cols-3 items-start gap-8 lg:gap-12 pt-8 border-t border-slate-800/60 mb-16">
+          {/* Part 1: Email, Address, and Social Icons */}
+          <motion.div
+            className="min-w-0"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            {/* Contact Info */}
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center gap-2 text-sm text-slate-300">
+                <Mail className="w-4 h-4 text-white" />
+                <a href={`mailto:${contactInfo.email}`} className="text-slate-300 hover:text-white transition-colors">
+                  {contactInfo.email}
+                </a>
+              </div>
+              {/* <div className="flex items-center gap-2 text-sm text-slate-300">
+                <Phone className="w-4 h-4 text-accent" />
+                <a href={`tel:${contactInfo.phone}`} className="text-slate-300 hover:text-white transition-colors">
+                  {contactInfo.phone}
+                </a>
+              </div> */}
+              <div className="flex items-center gap-2 text-sm text-slate-300">
+                <MapPin className="w-4 h-4 text-emerald-500" />
+                <span className="text-slate-300">{contactInfo.address}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              {socialLinks.map((social, index) => (
+                <motion.a
+                  key={index}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  className="group w-10 h-10 rounded-full bg-slate-800/50 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-slate-700 hover:border-transparent text-slate-300"
+                  aria-label={social.label}
+                >
+                  {/* {social.customIcon ? (
+                    <social.customIcon className={`w-5 h-5 transition-colors ${social.hoverColor}`} />
+                  ) : ( */}
+                  <social.icon className={`w-5 h-5 transition-colors ${social.hoverColor}`} />
+                  {/* )} */}
+                </motion.a>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Part 2: Blogs & Events Section */}
+          <motion.div
+            className="min-w-0"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            viewport={{ once: true }}
+          >
+            <div className="mb-4 flex min-h-10 items-center gap-2">
+              <Newspaper className="w-4 h-4 text-white" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">Blogs & Events</h3>
+            </div>
+            <ul className="space-y-2">
+              {footerLinks.blogsAndEvents.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-slate-300 hover:text-slate-100 transition-colors group flex items-center gap-1"
+                  >
+                    {link.label}
+                    <ArrowRight className="w-3 h-3 opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all text-slate-300" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Part 3: Partner With Us */}
+          <motion.div
+            className="min-w-0"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="mb-4 flex min-h-10 items-center gap-2">
+              <Handshake className="w-4 h-4 text-white" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">Partner With Us</h3>
+            </div>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/partner-with-us"
+                  className="text-sm text-slate-300 hover:text-slate-100 transition-colors group flex items-center gap-1"
+                >
+                  Partner With Us
+                  <ArrowRight className="w-3 h-3 opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all text-slate-300" />
+                </Link>
+              </li>
+            </ul>
+          </motion.div>
         </div>
 
         {/* Quick Contact Bar */}

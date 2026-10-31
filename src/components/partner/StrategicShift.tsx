@@ -22,7 +22,7 @@ export default function StrategicShift() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50/70 via-white to-indigo-50/70 py-24">
+    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50/70 via-white to-indigo-50/70 py-10 lg:py-12">
       {/* Decorative background elements */}
       <div
         aria-hidden="true"
@@ -34,25 +34,25 @@ export default function StrategicShift() {
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-blue-600 font-semibold tracking-wider uppercase mb-3 text-sm">The Core Shift</h2>
-            <h3 className="text-4xl font-extrabold text-gray-900 mb-6">A Strategic Reframe</h3>
-            <p className="text-xl text-gray-600 font-light leading-relaxed">
+            <h2 className="text-blue-600 font-semibold tracking-wider uppercase mb-1.5 text-xs">The Core Shift</h2>
+            <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">A Strategic Reframe</h3>
+            <p className="text-base md:text-lg text-gray-600 font-light leading-relaxed">
               We are moving from a transactional model to a collaborative growth network. Your existing trust and physical presence are exactly what the ecosystem needs.
             </p>
           </motion.div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto relative">
+        <div className="grid md:grid-cols-2 gap-6 relative">
           {/* Connecting arrow/line for desktop */}
           <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-            <div className="w-12 h-12 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-gray-400">
-              <span className="material-symbols-outlined">arrow_forward</span>
+            <div className="w-10 h-10 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-gray-400">
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
             </div>
           </div>
 
@@ -63,15 +63,17 @@ export default function StrategicShift() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.2 }}
-              className={`p-10 rounded-3xl bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-xl border border-white/60 shadow-xl shadow-gray-200/20 relative overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300`}
+              className={`p-6 rounded-2xl bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-xl border border-white/60 shadow-xl shadow-gray-200/20 relative overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300`}
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${shift.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              <div className="relative z-10">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 bg-white/50 backdrop-blur-sm shadow-sm border border-white/60 group-hover:scale-110 transition-transform duration-300`}>
-                  <span className={`material-symbols-outlined text-3xl ${shift.iconColor}`}>{shift.icon}</span>
+              <div className="relative z-10 flex items-start gap-4">
+                <div className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center bg-white/50 backdrop-blur-sm shadow-sm border border-white/60 group-hover:scale-110 transition-transform duration-300`}>
+                  <span className={`material-symbols-outlined text-2xl ${shift.iconColor}`}>{shift.icon}</span>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-4">{shift.title}</h4>
-                <p className="text-gray-600 leading-relaxed">{shift.description}</p>
+                <div>
+                  <h4 className="text-xl font-bold text-gray-900 mb-1.5">{shift.title}</h4>
+                  <p className="text-sm text-gray-600 leading-relaxed">{shift.description}</p>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -82,24 +84,26 @@ export default function StrategicShift() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-24 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 backdrop-blur-xl rounded-3xl p-10 max-w-5xl mx-auto border border-white/60 shadow-2xl shadow-blue-900/5"
+          className="mt-6 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 backdrop-blur-xl rounded-2xl p-6 border border-white/60 shadow-xl shadow-blue-900/5"
         >
-          <div className="text-center mb-12">
-            <h4 className="text-2xl font-bold text-gray-900">What We Bring to the Table</h4>
+          <div className="text-center mb-5">
+            <h4 className="text-lg font-bold text-gray-900">What We Bring to the Table</h4>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { title: "Technology Layer", icon: "laptop_mac", desc: "White-label portal & APIs" },
               { title: "Outcome Verification", icon: "verified", desc: "Skill Ledger & readiness" },
               { title: "Distribution Channel", icon: "hub", desc: "Job board & marketplace" },
               { title: "Revenue Stream", icon: "payments", desc: "Commission & rev-share" }
             ].map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center text-center group">
-                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors duration-300">
-                  <span className="material-symbols-outlined text-blue-600 group-hover:text-white transition-colors duration-300">{item.icon}</span>
+              <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/60 group">
+                <div className="w-11 h-11 shrink-0 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-colors duration-300">
+                  <span className="material-symbols-outlined text-xl text-blue-600 group-hover:text-white transition-colors duration-300">{item.icon}</span>
                 </div>
-                <span className="font-bold text-gray-900 mb-1">{item.title}</span>
-                <span className="text-sm text-gray-500">{item.desc}</span>
+                <div className="text-left">
+                  <div className="font-bold text-sm text-gray-900">{item.title}</div>
+                  <div className="text-xs text-gray-500">{item.desc}</div>
+                </div>
               </div>
             ))}
           </div>

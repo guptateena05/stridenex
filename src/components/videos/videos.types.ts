@@ -10,12 +10,23 @@ export interface VideoCategoryDetails {
 export interface VideoItem {
   name: string;
   youtube_url: string;
+  upload_date?: string | null;
   category?: string;
   publication_status?: string;
   creation: string;
   category_details?: VideoCategoryDetails;
   title?: string;
   description?: string;
+  thumbnail?: string;
+}
+
+export interface ShortItem {
+  name: string;
+  youtube_short_url: string;
+  youtube_url?: string;
+  publication_status?: string;
+  creation: string;
+  title?: string;
   thumbnail?: string;
 }
 
@@ -38,10 +49,34 @@ export interface YouTubeOEmbedMetadata {
 }
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/api\/?$/, "") || "";
-export const VIDEOS_PER_PAGE = 9;
+export const VIDEOS_PER_PAGE = 12;
+export const SHORTS_PER_PAGE = 10;
+export const SHORTS_PER_PAGE_DISPLAY = 8;
 
 export function getVideosEndpoint(page: number, pageSize: number = VIDEOS_PER_PAGE) {
   return `${BASE_URL}/api/method/stridenex_app.api_stridenex_app.videos.get_videos?page=${page}&page_size=${pageSize}`;
+}
+
+export function getShortsEndpoint(page: number = 1, pageSize: number = SHORTS_PER_PAGE) {
+  return `${BASE_URL}/api/method/stridenex_app.api_stridenex_app.shorts.get_shorts?page=${page}&page_size=${pageSize}`;
+}
+
+export function getShortUrl(short: ShortItem): string {
+  return (short.youtube_short_url || short.youtube_url || "").trim();
+}
+
+export function getCanonicalYouTubeShortsUrl(shortUrl?: string): string {
+  const id = extractYouTubeId(shortUrl);
+  if (id) {
+    return `https://www.youtube.com/shorts/${id}`;
+  }
+  return shortUrl || "https://www.youtube.com/@stridenex/shorts";
+}
+
+export function getYouTubeShortEmbedUrl(shortUrl?: string): string {
+  const id = extractYouTubeId(shortUrl);
+  if (!id) return "";
+  return `https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&playsinline=1&loop=1&playlist=${encodeURIComponent(id)}`;
 }
 
 export function extractYouTubeId(value?: string): string {
@@ -145,6 +180,52 @@ export async function fetchYouTubeMetadata(
           provider_name: data.provider_name || "YouTube",
         };
         metadataCache.set(cacheKey, meta);
+        return meta;
+      }
+    } catch {
+      // Try next fallback endpoint
+    }
+  }
+
+  return null;
+}
+
+const shortMetadataCache = new Map<string, YouTubeOEmbedMetadata>();
+
+/**
+ * Lightweight client-side metadata fetcher for YouTube Shorts (Title & Thumbnail only).
+ * Uses public browser-accessible oEmbed endpoints with zero API keys or server-IP scraping.
+ */
+export async function fetchShortOEmbedMetadata(
+  shortUrl: string
+): Promise<YouTubeOEmbedMetadata | null> {
+  const videoId = extractYouTubeId(shortUrl);
+  const cacheKey = videoId || shortUrl;
+
+  if (shortMetadataCache.has(cacheKey)) {
+    return shortMetadataCache.get(cacheKey)!;
+  }
+
+  const watchUrl = getCanonicalYouTubeWatchUrl(shortUrl);
+  const endpoints = [
+    `https://www.youtube.com/oembed?url=${encodeURIComponent(watchUrl)}&format=json`,
+    `https://noembed.com/embed?url=${encodeURIComponent(watchUrl)}`,
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint);
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.title) {
+        const meta: YouTubeOEmbedMetadata = {
+          title: data.title,
+          author_name: data.author_name || "StrideNex",
+          author_url: data.author_url,
+          thumbnail_url: data.thumbnail_url,
+          provider_name: data.provider_name || "YouTube",
+        };
+        shortMetadataCache.set(cacheKey, meta);
         return meta;
       }
     } catch {

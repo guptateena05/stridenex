@@ -1,18 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CreditCard,
   Download,
-  Calendar,
-  Clock,
   CheckCircle2,
   AlertCircle,
   Clock3,
-  ExternalLink,
-  Layers,
   GraduationCap,
   Users,
   Building2,
@@ -21,7 +16,13 @@ import {
   TrendingUp,
   Receipt,
   ArrowLeft,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  FileText,
+  Printer,
+  X,
+  Loader2,
+  ExternalLink
 } from "lucide-react";
 import {
   UserInfo,
@@ -32,6 +33,15 @@ import {
   PaymentItem,
   UnifiedPaymentHistoryData,
 } from "@/types/payment.types";
+
+interface SelectedInvoice {
+  url: string;
+  title: string;
+  invoiceNo?: string;
+  date?: string;
+  amount?: number;
+  currency?: string;
+}
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_FRAPPE_URL ||
@@ -45,6 +55,12 @@ export default function PaymentsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
+
+  // PDF Modal state
+  const [selectedInvoice, setSelectedInvoice] = useState<SelectedInvoice | null>(null);
+  const [invoiceBlobUrl, setInvoiceBlobUrl] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const fetchPayments = useCallback(async (category = "all", page = 1) => {
     setLoading(true);
@@ -66,10 +82,33 @@ export default function PaymentsPage() {
         headers["Authorization"] = `token ${apiKey}:${apiSecret}`;
       }
 
-      const res = await fetch(
-        `${API_BASE_URL}/api/method/lms.lms.stride_lms.get_user_payment_history?category=${category}&page=${page}&page_length=15`,
+      const currentUser =
+        typeof window !== "undefined"
+          ? localStorage.getItem("userEmail") ||
+            localStorage.getItem("user") ||
+            localStorage.getItem("email") ||
+            ""
+          : "";
+      const userParam = currentUser ? `&user=${encodeURIComponent(currentUser)}` : "";
+
+      let res = await fetch(
+        `${API_BASE_URL}/api/method/lms.lms.stride_lms.get_user_payment_history?category=${category}&page=${page}&page_length=15${userParam}`,
         { headers, credentials: "include" }
       );
+
+      // Fallback to devlms.stridenex.ai if needed
+      if (!res.ok && API_BASE_URL.includes("devstridenex.quantcloud.in")) {
+        try {
+          const fallbackRes = await fetch(
+            `https://devlms.stridenex.ai/api/method/lms.lms.stride_lms.get_user_payment_history?category=${category}&page=${page}&page_length=15${userParam}`,
+            { headers, credentials: "include" }
+          );
+          if (fallbackRes.ok) {
+            res = fallbackRes;
+          }
+        } catch (_) {}
+      }
+
       const json = await res.json();
       if (json.message?.success && json.message?.data) {
         setData(json.message.data);
@@ -157,24 +196,205 @@ export default function PaymentsPage() {
   };
 
   const buildDownloadUrl = (url: string) => {
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
+    let cleanUrl = url;
+    // Route Sales Invoices / download_pdf and course payment slips to devlms.stridenex.ai where ERPNext & LMS reside
+    if (
+      cleanUrl.includes("devstridenex.quantcloud.in") &&
+      (cleanUrl.includes("download_pdf") || cleanUrl.includes("download_payment_slip"))
+    ) {
+      cleanUrl = cleanUrl.replace("https://devstridenex.quantcloud.in", "https://devlms.stridenex.ai");
     }
-    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
-    return `${API_BASE_URL}${cleanUrl}`;
+
+    if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
+      return cleanUrl;
+    }
+    const path = cleanUrl.startsWith("/") ? cleanUrl : `/${cleanUrl}`;
+    if (path.includes("download_payment_slip") || path.includes("download_pdf")) {
+      return `https://devlms.stridenex.ai${path}`;
+    }
+    return `${API_BASE_URL}${path}`;
   };
+
+  // Fetch PDF as authenticated blob to avoid redirects to backend login
+  const fetchInvoicePdf = useCallback(async (url: string) => {
+    setPdfLoading(true);
+    setPdfError(null);
+    if (invoiceBlobUrl) {
+      URL.revokeObjectURL(invoiceBlobUrl);
+      setInvoiceBlobUrl(null);
+    }
+    try {
+      const apiKey =
+        typeof window !== "undefined"
+          ? localStorage.getItem("apiKey") || localStorage.getItem("api_key")
+          : null;
+      const apiSecret =
+        typeof window !== "undefined"
+          ? localStorage.getItem("apiSecret") || localStorage.getItem("api_secret")
+          : null;
+
+      const headers: Record<string, string> = {};
+      if (apiKey && apiSecret) {
+        headers["Authorization"] = `token ${apiKey}:${apiSecret}`;
+      }
+
+      const fullUrl = buildDownloadUrl(url);
+      let res = await fetch(fullUrl, { headers, credentials: "include" });
+
+      // Fallback 1: If devstridenex failed with 500, retry on devlms.stridenex.ai where ERPNext is working
+      if (!res.ok && fullUrl.includes("devstridenex.quantcloud.in")) {
+        const fallbackUrl = fullUrl.replace("https://devstridenex.quantcloud.in", "https://devlms.stridenex.ai");
+        try {
+          const fallbackRes = await fetch(fallbackUrl, { headers, credentials: "include" });
+          if (fallbackRes.ok) {
+            res = fallbackRes;
+          }
+        } catch (_) {}
+      }
+
+      // Fallback 2: Retry without format=Standard if print format issue
+      if (!res.ok && fullUrl.includes("&format=Standard")) {
+        const noFormatUrl = fullUrl.replace("&format=Standard", "");
+        try {
+          const altRes = await fetch(noFormatUrl, { headers, credentials: "include" });
+          if (altRes.ok) {
+            res = altRes;
+          }
+        } catch (_) {}
+      }
+
+      if (!res.ok) {
+        throw new Error(`Server returned error status ${res.status}`);
+      }
+
+      const blob = await res.blob();
+
+      // Check if response is HTML
+      if (blob.type.includes("html") || blob.type.includes("text")) {
+        const text = await blob.text();
+        if (text.startsWith("{") && text.includes("exc_type")) {
+          try {
+            const parsed = JSON.parse(text);
+            throw new Error(parsed.message || parsed.exc_type || "Invoice preview not available from server.");
+          } catch (e: any) {
+            throw new Error(e.message || "Server error while generating invoice");
+          }
+        }
+        const htmlBlobUrl = URL.createObjectURL(new Blob([text], { type: "text/html" }));
+        setInvoiceBlobUrl(htmlBlobUrl);
+        return;
+      }
+
+      if (blob.type.includes("json")) {
+        const text = await blob.text();
+        try {
+          const parsed = JSON.parse(text);
+          throw new Error(parsed.message || parsed.exc_type || "Failed to load invoice PDF");
+        } catch (e: any) {
+          throw new Error(e.message || "Failed to load invoice PDF");
+        }
+      }
+
+      const blobUrl = URL.createObjectURL(
+        new Blob([blob], { type: "application/pdf" })
+      );
+      setInvoiceBlobUrl(blobUrl);
+    } catch (err: any) {
+      console.error("Failed to fetch invoice PDF:", err);
+      setPdfError(err?.message || "Failed to load invoice preview.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }, [invoiceBlobUrl]);
+
+  const handleOpenInvoiceModal = (invoice: SelectedInvoice) => {
+    setSelectedInvoice(invoice);
+    fetchInvoicePdf(invoice.url);
+  };
+
+  const handleCloseInvoiceModal = () => {
+    if (invoiceBlobUrl) {
+      URL.revokeObjectURL(invoiceBlobUrl);
+    }
+    setInvoiceBlobUrl(null);
+    setSelectedInvoice(null);
+    setPdfError(null);
+  };
+
+  const handleDownloadPdf = () => {
+    if (!invoiceBlobUrl) return;
+    const link = document.createElement("a");
+    link.href = invoiceBlobUrl;
+    link.download = `Invoice-${selectedInvoice?.invoiceNo || selectedInvoice?.title || "receipt"}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrintPdf = () => {
+    const iframe = document.getElementById("invoice-pdf-frame") as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } else if (invoiceBlobUrl) {
+      const printWindow = window.open(invoiceBlobUrl);
+      printWindow?.print();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleCloseInvoiceModal();
+    };
+    if (selectedInvoice) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [selectedInvoice]);
 
   const userInfo = data?.user_info;
   const summary = data?.summary;
   const activePlan = summary?.active_plan;
   const earningsSummary = data?.mentor_earnings_summary;
-  const categories = data?.categories || [];
   const payments = data?.payments || [];
   const pagination = data?.pagination;
+
+  // Ensure "Courses & Batches" tab is always visible for students / learners or when course transactions exist
+  const categories: CategoryTab[] = React.useMemo(() => {
+    if (!data) return [];
+    const list: CategoryTab[] = [...(data.categories || [])];
+
+    const hasCourseTab = list.some((c) => c.key === "course");
+    const courseCount =
+      summary?.courses_count ??
+      payments.filter((p) => p.category === "course").length ??
+      0;
+
+    // If user is a student/learner or if course transactions exist, guarantee the "course" tab
+    if (!hasCourseTab && (!userInfo?.is_organization || courseCount > 0)) {
+      list.push({
+        key: "course",
+        label: "Courses & Batches",
+        count: courseCount,
+      });
+    }
+
+    return list.map((tab) => {
+      if (tab.key === "course" && tab.count === 0 && courseCount > 0) {
+        return { ...tab, count: courseCount };
+      }
+      return tab;
+    });
+  }, [data, summary, userInfo, payments]);
 
   return (
     <div className="min-h-screen bg-slate-50/60 font-sans text-slate-800 flex flex-col py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto w-full space-y-6">
+        
         {/* Header Title & Role */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
@@ -214,7 +434,7 @@ export default function PaymentsPage() {
           </div>
         </div>
 
-        {/* View 1: College / Industry Active Plan Banner */}
+        {/* View 1: Organization Active Plan Banner */}
         {userInfo?.is_organization && activePlan && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-xl">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -242,15 +462,21 @@ export default function PaymentsPage() {
               </div>
 
               {activePlan.invoice_url && (
-                <a
-                  href={buildDownloadUrl(activePlan.invoice_url)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:bg-slate-100 transition shadow"
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleOpenInvoiceModal({
+                      url: activePlan.invoice_url!,
+                      title: activePlan.name,
+                      invoiceNo: activePlan.invoice_no,
+                      date: activePlan.purchase_date || undefined,
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 text-sm font-semibold hover:bg-slate-100 transition shadow cursor-pointer"
                 >
-                  <Download className="w-4 h-4" />
-                  Download Current Invoice PDF
-                </a>
+                  <FileText className="w-4 h-4" />
+                  View Current Invoice PDF
+                </button>
               )}
             </div>
           </div>
@@ -258,7 +484,7 @@ export default function PaymentsPage() {
 
         {/* Dynamic KPI Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Spent / Plan Spend */}
+          {/* Base Card: Total Paid / Total Investment */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -276,7 +502,7 @@ export default function PaymentsPage() {
             </div>
           </div>
 
-          {/* Mentor Specific Earnings KPI */}
+          {/* Mentor Specific KPIs */}
           {userInfo?.is_mentor && earningsSummary && (
             <>
               <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
@@ -382,7 +608,7 @@ export default function PaymentsPage() {
             </>
           )}
 
-          {/* College / Industry Second Stat Card */}
+          {/* Organization Secondary KPI Card */}
           {userInfo?.is_organization && (
             <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
               <div>
@@ -501,15 +727,24 @@ export default function PaymentsPage() {
                         </td>
                         <td className="py-4 px-4 sm:px-6 whitespace-nowrap text-right">
                           {downloadUrl ? (
-                            <a
-                              href={buildDownloadUrl(downloadUrl)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition"
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleOpenInvoiceModal({
+                                  url: downloadUrl,
+                                  title: p.title,
+                                  invoiceNo: p.invoice_no,
+                                  date: p.date,
+                                  amount: p.amount,
+                                  currency: p.currency,
+                                })
+                              }
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition cursor-pointer"
+                              title="View Invoice"
                             >
-                              <Download className="w-3.5 h-3.5" />
+                              <FileText className="w-3.5 h-3.5" />
                               PDF
-                            </a>
+                            </button>
                           ) : (
                             <span className="text-xs text-slate-400">—</span>
                           )}
@@ -522,7 +757,7 @@ export default function PaymentsPage() {
             </div>
           )}
 
-          {/* Pagination */}
+          {/* Pagination Footer */}
           {pagination && pagination.total_pages > 1 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/40">
               <p className="text-xs text-slate-500">
@@ -550,6 +785,127 @@ export default function PaymentsPage() {
             </div>
           )}
         </div>
+
+        {/* PDF Invoice Preview Modal / Popup */}
+        {selectedInvoice && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={handleCloseInvoiceModal}
+          >
+            <div
+              className="relative w-full max-w-4xl h-[88vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50/90 shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                    <Receipt className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-bold text-slate-900 truncate">
+                        {selectedInvoice.title || "Invoice Preview"}
+                      </h3>
+                      {selectedInvoice.invoiceNo && (
+                        <span className="px-2 py-0.5 rounded text-xs font-mono font-medium bg-slate-200/80 text-slate-700">
+                          {selectedInvoice.invoiceNo}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">
+                      {selectedInvoice.date && <span>Date: {selectedInvoice.date} • </span>}
+                      {selectedInvoice.amount !== undefined && (
+                        <span>
+                          Amount: {formatCurrency(selectedInvoice.amount, selectedInvoice.currency)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {invoiceBlobUrl && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleDownloadPdf}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition shadow-sm cursor-pointer"
+                        title="Download PDF"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Download</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handlePrintPdf}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition shadow-sm cursor-pointer"
+                        title="Print Invoice"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Print</span>
+                      </button>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleCloseInvoiceModal}
+                    className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                {pdfLoading ? (
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-3" />
+                    <p className="text-sm font-semibold text-slate-700">Loading invoice document...</p>
+                    <p className="text-xs text-slate-400 mt-1">Authenticating and generating secure preview</p>
+                  </div>
+                ) : pdfError ? (
+                  <div className="flex flex-col items-center justify-center p-8 text-center max-w-md">
+                    <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+                      <AlertCircle className="w-6 h-6" />
+                    </div>
+                    <p className="text-sm font-semibold text-slate-900 mb-1">Failed to load invoice</p>
+                    <p className="text-xs text-slate-500 mb-4">{pdfError}</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => selectedInvoice && fetchInvoicePdf(selectedInvoice.url)}
+                        className="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition cursor-pointer"
+                      >
+                        Try Again
+                      </button>
+                      {selectedInvoice && (
+                        <a
+                          href={buildDownloadUrl(selectedInvoice.url)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 transition"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Open Link Directly
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : invoiceBlobUrl ? (
+                  <iframe
+                    id="invoice-pdf-frame"
+                    src={`${invoiceBlobUrl}#toolbar=1`}
+                    className="w-full h-full border-0 bg-white"
+                    title="Invoice PDF Document"
+                  />
+                ) : null}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

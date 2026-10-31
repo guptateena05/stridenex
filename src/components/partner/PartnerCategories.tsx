@@ -80,25 +80,25 @@ export default function PartnerCategories() {
   };
 
   return (
-    <section className="py-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-slate-50 to-indigo-50/50">
+    <section className="py-8 lg:py-10 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-slate-50 to-indigo-50/50">
       {/* Decorative background */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(#9ca3af_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.15]"></div>
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-20">
+      <div className="relative z-10 max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="text-center max-w-3xl mx-auto mb-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-6">Who Can Partner With Us?</h2>
-            <p className="text-xl text-gray-600 font-light">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">Who Can Partner With Us?</h2>
+            <p className="text-base md:text-lg text-gray-600 font-light">
               If you have physical reach, existing trust, and practical execution capability, you are the right fit.
             </p>
           </motion.div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {categories.map((category, index) => (
             <motion.div
               key={index}
@@ -106,17 +106,17 @@ export default function PartnerCategories() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
-              className={`bg-white/30 backdrop-blur-xl rounded-3xl p-8 border border-white/60 shadow-lg shadow-blue-900/5 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group ${getHoverCardClass(category.color)}`}
+              className={`bg-white/30 backdrop-blur-xl rounded-3xl p-5 border border-white/60 shadow-lg shadow-blue-900/5 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group flex flex-col ${getHoverCardClass(category.color)}`}
             >
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300 ${getColorClasses(category.color)}`}>
-                <span className="material-symbols-outlined text-2xl group-hover:text-white transition-colors duration-300">{category.icon}</span>
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-3 transition-colors duration-300 ${getColorClasses(category.color)}`}>
+                <span className="material-symbols-outlined text-xl group-hover:text-white transition-colors duration-300">{category.icon}</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-5 leading-snug">{category.title}</h3>
-              <ul className="space-y-4">
+              <h3 className="text-base font-bold text-gray-900 mb-3 leading-snug">{category.title}</h3>
+              <ul className="space-y-2">
                 {category.benefits.map((benefit, idx) => (
                   <li key={idx} className="flex items-start group/item">
-                    <span className="material-symbols-outlined text-green-500 text-[18px] mt-0.5 mr-3 group-hover/item:scale-110 transition-transform">check_circle</span>
-                    <span className="text-gray-600 text-sm font-medium leading-relaxed">{benefit}</span>
+                    <span className="material-symbols-outlined text-green-500 text-[16px] mt-0.5 mr-2 shrink-0 group-hover/item:scale-110 transition-transform">check_circle</span>
+                    <span className="text-gray-600 text-[13px] font-medium leading-snug">{benefit}</span>
                   </li>
                 ))}
               </ul>

@@ -314,7 +314,7 @@ export default function PublicNavbar({ }: NavbarProps) {
                                 section.items.map(item => (
                                   <button
                                     key={item.label}
-                                    onClick={() => window.open(item.href, '_blank')}
+                                    onClick={() => item.href === '/partner-with-us' ? handleNavigation(item.href) : window.open(item.href, '_blank')}
                                     className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors text-left group/item"
                                   >
                                     {item.icon && (

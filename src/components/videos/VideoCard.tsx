@@ -3,15 +3,13 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Calendar, Clock, ExternalLink, Play, Tag } from "lucide-react";
+import { Calendar, ExternalLink, Play, Tag } from "lucide-react";
 import {
   type VideoItem,
   type YouTubeOEmbedMetadata,
   fetchYouTubeMetadata,
   formatDuration,
-  formatRelativeTime,
   formatVideoDate,
-  formatViews,
   getVideoTopic,
   getYouTubeThumbnail,
 } from "./videos.types";
@@ -77,12 +75,8 @@ export default function VideoCard({
 
   const authorName = meta?.author_name || "StrideNex";
 
-  // Prefer actual YouTube uploadDate, fallback to backend record creation timestamp
-  const effectiveDateSource = meta?.uploadDate || video.creation;
-  const formattedDate = formatVideoDate(effectiveDateSource);
-  const relativeDate = formatRelativeTime(effectiveDateSource);
+  const formattedDate = formatVideoDate(video.upload_date || "");
   const durationLabel = formatDuration(meta?.lengthSeconds);
-  const viewsLabel = formatViews(meta?.viewCount);
 
   const handleImageError = () => {
     if (thumbQuality === "maxresdefault") {
@@ -189,33 +183,20 @@ export default function VideoCard({
             </h3>
           )}
 
-          {/* Channel Name & Views */}
+          {/* Channel Name */}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-500">
             <span className="font-medium text-slate-600">{authorName}</span>
-            {viewsLabel && (
-              <>
-                <span className="text-slate-300">•</span>
-                <span>{viewsLabel}</span>
-              </>
-            )}
           </div>
 
-          {/* YouTube Upload Date + Relative Time (".. mins/days ago") */}
-          <div className="mt-auto pt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100/80 text-[11px] text-slate-500">
-            {relativeDate && (
-              <span className="inline-flex items-center gap-1 font-medium text-slate-600">
-                <Clock className="h-3 w-3 text-blue-500" />
-                {relativeDate}
-              </span>
-            )}
-
-            {formattedDate && (
+          {/* DocType Upload Date */}
+          {formattedDate && (
+            <div className="mt-auto pt-2.5 flex flex-wrap items-center gap-2 border-t border-slate-100/80 text-[11px] text-slate-500">
               <span className="inline-flex items-center gap-1 text-slate-400">
                 <Calendar className="h-3 w-3" />
                 {formattedDate}
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </motion.a>
