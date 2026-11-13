@@ -5,6 +5,7 @@ import { BASE_URL } from "@/services/api.services";
 import axios from "axios";
 import Dropdown from "@/components/ui/Dropdown";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import PartnerCategorySelector from "./PartnerCategorySelector";
 import { sendEmailOTP, verifyEmailOTP, sendMobileOTP, verifyMobileOTP } from "@/services/onboarding.services";
 
 export default function PartnerForm() {
@@ -180,6 +181,11 @@ export default function PartnerForm() {
       return;
     }
 
+    if (!formData.partnerType) {
+      setSubmitError("Please select your partner category.");
+      return;
+    }
+
     const passwordError = validatePassword(formData.password);
     if (passwordError) {
       setSubmitError(passwordError);
@@ -202,7 +208,8 @@ export default function PartnerForm() {
         state: formData.state,
         password: formData.password,
         country: formData.country,
-        partner_type: formData.partnerType
+        partner_type: formData.partnerType,
+        partner_category: formData.partnerType
       };
 
       const response = await axios.post(
@@ -502,24 +509,10 @@ export default function PartnerForm() {
                   />
                 </div>
 
-                <div className="relative">
-                  <Dropdown
-                    id="partnerType"
-                    placeholder="I am interested in becoming a(n)..."
-                    value={formData.partnerType}
-                    onChange={(val) => setFormData({ ...formData, partnerType: val })}
-                    options={[
-                      "Placement Consultant",
-                      "Training Center",
-                      "Faculty Association",
-                      "Government Body",
-                      "Industry Association",
-                      "EdTech Aggregator",
-                      "Mentor"
-                    ]}
-                    required
-                  />
-                </div>
+                <PartnerCategorySelector
+                  value={formData.partnerType}
+                  onChange={(val) => setFormData({ ...formData, partnerType: val })}
+                />
               </div>
 
               <div className="grid sm:grid-cols-2 gap-3.5">
