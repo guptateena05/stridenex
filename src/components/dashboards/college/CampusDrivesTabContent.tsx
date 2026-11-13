@@ -703,8 +703,11 @@ export default function CampusDrivesTabContent() {
   };
 
   const handleNotifyCandidateMail = async (student: any, status: string, driveName: string) => {
-    const email = student.email || student.email_id || student.name || student.student_id;
-    const fullName = `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.name || student.student_id || student.email || "Candidate";
+    const rawEmail = student.email_id || student.email || student.student_email || student.user_email || student.user;
+    const email = (typeof rawEmail === "string" && rawEmail.includes("@"))
+      ? rawEmail.trim()
+      : ((typeof student.name === "string" && student.name.includes("@")) ? student.name.trim() : null);
+    const fullName = student.student_name || `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.name || student.student_id || "Candidate";
     if (!email) {
       showToast("Student email is not available", "error");
       if (typeof window !== "undefined") {
@@ -712,13 +715,14 @@ export default function CampusDrivesTabContent() {
       }
       return;
     }
+    const resolvedDriveName = driveName || activeEligibilityDrive?.name || activeEligibilityDrive?.company || selectedDrive?.name || selectedDrive?.company || "Campus Placement Drive";
     try {
       showToast(`Sending notification email to ${fullName}...`, "info");
       const mailRes = await sendCandidateStatusMail({
         email,
         status,
         candidate_name: fullName,
-        drive_name: driveName
+        drive_name: resolvedDriveName
       });
 
       if (mailRes && mailRes.message && (mailRes.message.status === 'error' || mailRes.message.status === 'failed' || mailRes.message.status === 'fail')) {
@@ -1170,14 +1174,21 @@ export default function CampusDrivesTabContent() {
 
   // Notification buttons toast triggers
   const triggerNotification = async (type: string) => {
-    if (!selectedDrive) return;
-    const driveName = selectedDrive.name || selectedDrive.company || "";
+    // Resolve active drive: from slide-over (selectedDrive) or from Eligibility tab (activeEligibilityDrive / eligibilityDriveId)
+    const targetDrive = selectedDrive || activeEligibilityDrive || (eligibilityDriveId ? drivesList.find(d => d.id === eligibilityDriveId) : null);
+
+    // If neither selectedDrive nor targetDrive exists, and we're not on eligibility tab, return early
+    if (!selectedDrive && activeSubTab !== 'eligibility' && !targetDrive) return;
+
+    const driveName = targetDrive?.name || targetDrive?.company || targetDrive?.role || "Campus Placement Drive";
 
     switch (type) {
       case 'eligible':
         try {
           showToast("Sending notification email to all eligible students...", "info");
-          const eligibleList = eligibleStudentsToRender;
+          const isEligibilityTab = activeSubTab === 'eligibility' || !selectedDrive;
+          const eligibleList = isEligibilityTab ? (tabEligibleLists.eligible || []) : eligibleStudentsToRender;
+
           if (eligibleList.length === 0) {
             showToast("No eligible students to notify", "warning");
             if (typeof window !== "undefined") {
@@ -1187,8 +1198,12 @@ export default function CampusDrivesTabContent() {
           }
           const results = await Promise.allSettled(
             eligibleList.map(async (student: any) => {
-              const email = student.email || student.email_id || student.name || student.student_id;
-              const fullName = `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.name || "Candidate";
+              const rawEmail = student.email_id || student.email || student.student_email || student.user_email || student.user;
+              const email = (typeof rawEmail === "string" && rawEmail.includes("@"))
+                ? rawEmail.trim()
+                : ((typeof student.name === "string" && student.name.includes("@")) ? student.name.trim() : null);
+
+              const fullName = student.student_name || `${student.first_name || ""} ${student.last_name || ""}`.trim() || student.name || "Candidate";
               if (email) {
                 const res = await sendCandidateStatusMail({
                   email,
@@ -1200,7 +1215,7 @@ export default function CampusDrivesTabContent() {
                   throw new Error(res.message.message || "Failed to send email");
                 }
               } else {
-                throw new Error("Missing email");
+                throw new Error(`Missing valid email for student: ${fullName}`);
               }
             })
           );
@@ -1245,8 +1260,12 @@ export default function CampusDrivesTabContent() {
           }
           const results = await Promise.allSettled(
             registeredList.map(async (record: any) => {
-              const email = record.email || record.email_id || record.student_id;
-              const fullName = `${record.first_name || ""} ${record.last_name || ""}`.trim() || "Candidate";
+              const rawEmail = record.email_id || record.email || record.student_email || record.user_email;
+              const email = (typeof rawEmail === "string" && rawEmail.includes("@"))
+                ? rawEmail.trim()
+                : ((typeof record.name === "string" && record.name.includes("@")) ? record.name.trim() : null);
+
+              const fullName = record.student_name || `${record.first_name || ""} ${record.last_name || ""}`.trim() || record.name || "Candidate";
               if (email) {
                 const res = await sendCandidateStatusMail({
                   email,
@@ -1311,8 +1330,12 @@ export default function CampusDrivesTabContent() {
           }
           const results = await Promise.allSettled(
             shortlistedList.map(async (record: any) => {
-              const email = record.email || record.email_id || record.student_id;
-              const fullName = `${record.first_name || ""} ${record.last_name || ""}`.trim() || "Candidate";
+              const rawEmail = record.email_id || record.email || record.student_email || record.user_email;
+              const email = (typeof rawEmail === "string" && rawEmail.includes("@"))
+                ? rawEmail.trim()
+                : ((typeof record.name === "string" && record.name.includes("@")) ? record.name.trim() : null);
+
+              const fullName = record.student_name || `${record.first_name || ""} ${record.last_name || ""}`.trim() || record.name || "Candidate";
               if (email) {
                 const res = await sendCandidateStatusMail({
                   email,
