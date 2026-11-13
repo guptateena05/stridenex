@@ -169,3 +169,22 @@ export interface PartnerPayoutSheet {
   creation?: string;
   released_on?: string;
 }
+
+export interface OnboardingPartnerCategory {
+  category_name: string;
+  category_code: string;
+  badge?: string | null;
+  description: string;
+  features: string[];
+  billing_settings: string;
+  reward_structure: {
+    type: "Per Module" | "Flat Amount" | "Tiered Volume";
+    student?: number;
+    industry?: number;
+    mentor?: number;
+    college?: number;
+    flat_reward?: number;
+    conversion_bonus?: number;
+    tiers?: Array<{ min: number; max: number; reward: number }>;
+  };
+}

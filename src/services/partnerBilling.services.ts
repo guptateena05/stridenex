@@ -4,6 +4,7 @@ import type {
   PartnerBillingStatement,
   PartnerBillingSummary,
   PartnerCategoryInfo,
+  OnboardingPartnerCategory,
   PartnerPayoutSheet,
 } from "@/types/partnerBilling.types";
 
@@ -48,6 +49,16 @@ export async function getPartnerBillingSummary(
     { params: partnerEmail ? { partner_email: partnerEmail } : undefined }
   );
   return unwrapPayload<PartnerBillingSummary>(res) || {};
+}
+
+export async function getOnboardingPartnerCategories(): Promise<
+  OnboardingPartnerCategory[]
+> {
+  const res = await apiService.get(
+    "method/stridenex_app.api_stridenex_app.partner.billing.get_onboarding_partner_categories"
+  );
+  const data = unwrapPayload<OnboardingPartnerCategory[]>(res);
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getPartnerCategoryInfo(
