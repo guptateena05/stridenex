@@ -437,7 +437,6 @@ export default function EventsTabContent() {
         <CardHeader
           title="Digital Notice Board"
           icon={<Bell className="w-4 h-4 text-orange-500" />}
-          action={{ label: "View All" }}
         />
 
         {loading ? (
@@ -450,13 +449,13 @@ export default function EventsTabContent() {
             {notices.map((notice) => {
               const Icon = notice.icon;
               return (
-                <BaseCard key={notice.id} className="hover:shadow-md transition-all cursor-pointer group">
+                <BaseCard key={notice.id} className="shadow-sm border-slate-100">
                   <div className="p-4 flex items-start gap-3">
                     <div className={`w-8 h-8 rounded-lg ${notice.color.replace('text', 'bg').replace('600', '50')} flex items-center justify-center flex-shrink-0`}>
                       <Icon className={`w-4 h-4 ${notice.color}`} />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800 group-hover:text-orange-600 transition-colors line-clamp-2">{notice.title}</p>
+                      <p className="text-sm font-medium text-slate-800 line-clamp-2">{notice.title}</p>
                       {notice.description && (
                         <p className="text-xs text-slate-500 mt-1 line-clamp-2">{notice.description.replace(/<[^>]*>/g, '')}</p>
                       )}
